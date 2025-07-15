@@ -9,7 +9,7 @@ import RegistrationModal from '../../components/RegistrationModal.jsx';
 import AcolhimentosSection from '../../components/AcolhimentosSection.jsx';
 import InformativosSection from '../../components/InformativosSection.jsx';
 import FaqSection from '../../components/FaqSection.jsx';
-import HortaRequestModal from '../../components/HortaRequestModal.jsx'; // LÓGICA NOVA
+import HortaRequestModal from '../../components/HortaRequestModal.jsx';
 
 import api from '../../services/api.js';
 import { medicinalPlantsData, recipesData, rpaData } from '../../constants/pancsData.js';
@@ -37,7 +37,7 @@ export default function Home() {
 
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isRegistrationModalOpen, setRegistrationModalOpen] = useState(false);
-  const [isHortaModalOpen, setIsHortaModalOpen] = useState(false); // LÓGICA NOVA
+  const [isHortaModalOpen, setIsHortaModalOpen] = useState(false);
   const [isAccessibilityMenuOpen, setAccessibilityMenuOpen] = useState(false);
   const [baseFontSize, setBaseFontSize] = useState(12.5);
   const [isDarkMode, setDarkMode] = useState(false);
@@ -221,7 +221,7 @@ export default function Home() {
   );
 
   return (
-    <div className="font-sans bg-[#F9FAFB] text-[#1D3557]">
+    <div className="font-sans text-[#1D3557]">
       <Header 
         isMenuOpen={isAccessibilityMenuOpen}
         onMenuToggle={() => setAccessibilityMenuOpen(prev => !prev)}
@@ -260,7 +260,6 @@ export default function Home() {
           </div>
         </div>
         
-        {/* LÓGICA NOVA: Passa a função para o componente AcolhimentosSection */}
         <AcolhimentosSection onSolicitarClick={() => setIsHortaModalOpen(true)} />
 
         <div id="cursos" className="relative z-10 bg-white py-12 md:py-16 rounded-3xl shadow-lg px-4 md:px-8">
@@ -316,6 +315,7 @@ export default function Home() {
                       {recipe.title}
                       <FaChevronDown className={`transform transition-transform duration-300 ${areRecipesOpen ? 'rotate-180' : ''}`} />
                     </summary>
+                    {/* ===== CORREÇÃO AQUI ===== */}
                     <div className="mt-4 text-gray-600 space-y-3 text-sm">
                       {recipe.sections.map((section, sIndex) => (
                         <div key={sIndex}>
@@ -325,6 +325,7 @@ export default function Home() {
                         </div>
                       ))}
                     </div>
+                    {/* ===== FIM DA CORREÇÃO ===== */}
                   </details>
                 ))}
               </div>
@@ -357,7 +358,6 @@ export default function Home() {
 
       <Footer />
       
-      {/* SEÇÃO DE MODAIS */}
       {selectedCourse && !isRegistrationModalOpen && (
         <CourseModal 
           course={selectedCourse} 
@@ -373,7 +373,6 @@ export default function Home() {
         />
       )}
       
-      {/* LÓGICA NOVA: Renderização do modal de solicitação de horta */}
       {isHortaModalOpen && <HortaRequestModal onClose={() => setIsHortaModalOpen(false)} />}
     </div>
   );
