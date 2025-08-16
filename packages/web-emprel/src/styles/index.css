@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* --- ESTILOS ESSENCIAIS PARA LEAFLET E PLUGINS --- */
+@import 'leaflet/dist/leaflet.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+@import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+/* --- FIM DOS ESTILOS ESSENCIAIS --- */
+
+/* 
+  ESTA É A CORREÇÃO PRINCIPAL:
+  - Aplica a cor de fundo desejada diretamente ao corpo (body) da página.
+  - Garante que o "espaço vazio" que aparece ao diminuir o zoom da fonte
+    tenha sempre a cor de fundo correta da aplicação, e não o branco padrão.
+*/
+@layer base {
+  body {
+    @apply bg-[#F9FAFB];
+  }
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+}
+
+/* 
+  O restante do seu código de modo noturno (dark mode) permanece o mesmo.
+  Ele continuará funcionando corretamente, sobrescrevendo a cor de fundo 
+  quando a classe 'dark-mode' for aplicada ao body.
+*/
+body.dark-mode {
+  background-color: #1a202c !important;
+  color: #d1d5db !important;
+}
+
+body.dark-mode .bg-\[\#F9FAFB\],
+body.dark-mode .bg-green-50 {
+  background-color: #1a202c !important;
+}
+
+body.dark-mode .bg-\[\#adcbe3\] {
+  background-color: #2c3e50 !important;
+}
+
+body.dark-mode .bg-white,
+body.dark-mode .bg-\[\#e7eff6\] {
+  background-color: #2d3748 !important;
+  border: 1px solid #4a5568;
+}
+
+body.dark-mode .text-\[\#1D3557\] {
+  color: #a5c9e2 !important;
+}
+
+body.dark-mode .text-gray-600,
+body.dark-mode .text-gray-700 {
+  color: #d1d5db !important;
+}
+
+body.dark-mode .bg-\[\#F4D35E\] {
+  color: #1D3557 !important;
+}
+
+body.dark-mode img,
+body.dark-mode video {
+  filter: brightness(.85) contrast(1);
+}
+
+body.dark-mode details {
+  background-color: #2d3748 !important;
+}
+
+.course-modal-content {
+  background-color: white;
+}
+
+body.dark-mode .course-modal-content {
+  background-color: #2d3748;
+  border-color: #4a5568;
+}
+
+body.dark-mode .course-modal-content .text-gray-500 {
+  color: #a0aec0;
+}
+
+body.dark-mode .course-modal-content .text-gray-700 {
+  color: #d1d5db;
+}
+
+body.dark-mode .course-modal-content .border-gray-200 {
+    border-color: #4a5568;
+}
+
+body.dark-mode .bg-emerald-100 {
+  background-color: #064e3b !important;
+}
