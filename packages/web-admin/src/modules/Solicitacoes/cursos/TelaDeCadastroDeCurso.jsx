@@ -50,7 +50,6 @@ export default function TelaDeCadastroDeCurso() {
         
         setFormOptions({ tiposAtividade, publicosAlvo, turnos });
 
-        // CORREÇÃO AQUI: Removida a forma funcional desnecessária de setFormData
         setFormData({
             ...initialFormState, 
             tipoAtividade: tiposAtividade?.[0] || '', 
@@ -137,106 +136,103 @@ export default function TelaDeCadastroDeCurso() {
     }
   };
   
-  // --- JSX de Renderização ---
-  // (O JSX permanece o mesmo da última versão, pois a correção é apenas na lógica do useEffect)
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100 font-poppins">
-      {/* <Header title="Cadastro de Atividade" /> */}
+    <div className="flex flex-col min-h-screen bg-[#A9AD99] font-poppins">
       <ToastContainer position="top-right" autoClose={3500} theme="colored" hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       
       <div className="flex-grow flex flex-col">
         <div className="flex-grow overflow-y-auto p-4 sm:p-6 lg:p-8">
           <form onSubmit={handleSubmit} id="curso-form" className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
-            <header className="pb-6 border-b border-gray-200">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Cadastro de Nova Atividade</h1>
-              <p className="text-sm sm:text-md text-gray-500 mt-1">Preencha os campos abaixo para criar uma nova atividade formativa.</p>
+            <header className="pb-6 border-b border-[#8a8d7a]">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#2d2e26]">Cadastro de Nova Atividade</h1>
+              <p className="text-sm sm:text-md text-[#4a4b42] mt-1">Preencha os campos abaixo para criar uma nova atividade formativa.</p>
             </header>
             
             <main className="space-y-5 sm:space-y-6">
-              <section className="p-5 sm:p-6 bg-white rounded-lg shadow">
-                <h2 className="text-lg sm:text-xl font-semibold mb-5 text-gray-700">Informações Principais</h2>
+              <section className="p-5 sm:p-6 bg-[#E6E3DC] rounded-lg shadow">
+                <h2 className="text-lg sm:text-xl font-semibold mb-5 text-[#2d2e26]">Informações Principais</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 sm:gap-y-5">
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Atividade *</label>
-                        <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0 p-1.5 bg-gray-100 rounded-md">
-                        {optionsLoading ? <p className="text-xs text-gray-500 p-2">Carregando opções...</p> : 
+                        <label className="block text-sm font-medium text-[#4a4b42] mb-1">Tipo de Atividade *</label>
+                        <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0 p-1.5 bg-[#d1cec6] rounded-md">
+                        {optionsLoading ? <p className="text-xs text-[#6b6c61] p-2">Carregando opções...</p> : 
                           formOptions.tiposAtividade.length > 0 ? formOptions.tiposAtividade.map((type) => ( 
-                            <label key={type} className={`flex-1 text-center py-2 px-3 rounded-md cursor-pointer transition-colors text-xs sm:text-sm ${formData.tipoAtividade === type ? 'bg-green-600 text-white shadow-md' : 'hover:bg-gray-200'}`}>
+                            <label key={type} className={`flex-1 text-center py-2 px-3 rounded-md cursor-pointer transition-colors text-xs sm:text-sm ${formData.tipoAtividade === type ? 'bg-green-600 text-white shadow-md' : 'hover:bg-[#c4c1b9] text-[#4a4b42]'}`}>
                             <input type="radio" name="tipoAtividade" value={type} checked={formData.tipoAtividade === type} onChange={handleChange} className="sr-only"/> 
                             {type}
                             </label>
-                        )) : <p className="text-xs text-gray-500 p-2">Nenhum tipo disponível.</p>}
+                        )) : <p className="text-xs text-[#6b6c61] p-2">Nenhum tipo disponível.</p>}
                         </div>
                     </div>
                     <div className="md:col-span-2">
-                        <label htmlFor="nome" className="block text-sm font-medium text-gray-700">Nome da Atividade *</label>
-                        <input id="nome" name="nome" type="text" value={formData.nome} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
+                        <label htmlFor="nome" className="block text-sm font-medium text-[#4a4b42]">Nome da Atividade *</label>
+                        <input id="nome" name="nome" type="text" value={formData.nome} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-[#b8b5ad] rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-[#f2f0e9] text-[#2d2e26]"/>
                     </div>
                     <div className="md:col-span-2">
-                        <label htmlFor="descricao" className="block text-sm font-medium text-gray-700">Descrição *</label>
-                        <textarea id="descricao" name="descricao" value={formData.descricao} onChange={handleChange} required rows="4" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm resize-y"/>
+                        <label htmlFor="descricao" className="block text-sm font-medium text-[#4a4b42]">Descrição *</label>
+                        <textarea id="descricao" name="descricao" value={formData.descricao} onChange={handleChange} required rows="4" className="mt-1 block w-full px-3 py-2 border border-[#b8b5ad] rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm resize-y bg-[#f2f0e9] text-[#2d2e26]"/>
                     </div>
                     <div>
-                        <label htmlFor="local" className="block text-sm font-medium text-gray-700">Local *</label>
-                        <input id="local" name="local" type="text" value={formData.local} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
+                        <label htmlFor="local" className="block text-sm font-medium text-[#4a4b42]">Local *</label>
+                        <input id="local" name="local" type="text" value={formData.local} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-[#b8b5ad] rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-[#f2f0e9] text-[#2d2e26]"/>
                     </div>
                     <div>
-                        <label htmlFor="instituicao" className="block text-sm font-medium text-gray-700">Instituição Responsável *</label>
-                        <input id="instituicao" name="instituicao" type="text" value={formData.instituicao} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
+                        <label htmlFor="instituicao" className="block text-sm font-medium text-[#4a4b42]">Instituição Responsável *</label>
+                        <input id="instituicao" name="instituicao" type="text" value={formData.instituicao} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-[#b8b5ad] rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-[#f2f0e9] text-[#2d2e26]"/>
                     </div>
                 </div>
               </section>
 
-              <section className="p-5 sm:p-6 bg-white rounded-lg shadow">
-                <h2 className="text-lg sm:text-xl font-semibold mb-5 text-gray-700">Detalhes da Atividade</h2>
+              <section className="p-5 sm:p-6 bg-[#E6E3DC] rounded-lg shadow">
+                <h2 className="text-lg sm:text-xl font-semibold mb-5 text-[#2d2e26]">Detalhes da Atividade</h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-4 sm:gap-y-5 items-start">
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Banner de Apresentação</label>
-                    <div className="w-full h-40 sm:h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center overflow-hidden relative group">
+                    <label className="block text-sm font-medium text-[#4a4b42]">Banner de Apresentação</label>
+                    <div className="w-full h-40 sm:h-48 bg-[#d1cec6] border-2 border-dashed border-[#b8b5ad] rounded-md flex items-center justify-center overflow-hidden relative group">
                       {bannerPreview ? (
                         <img src={bannerPreview} alt="Preview do banner" className="object-contain w-full h-full" />
                       ) : (
-                        <div className="flex flex-col items-center text-gray-400 p-4 text-center">
+                        <div className="flex flex-col items-center text-[#6b6c61] p-4 text-center">
                           <FiImage className="w-10 h-10 mb-1" />
                           <span className="text-xs">Selecione uma imagem</span>
                         </div>
                       )}
                     </div>
-                    <label className="w-full cursor-pointer flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm">
+                    <label className="w-full cursor-pointer flex items-center justify-center px-4 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium shadow-sm">
                       <FiUpload className="w-4 h-4 mr-2" /><span>Selecionar Imagem</span>
                       <input id="banner-upload" type="file" name="bannerFile" accept="image/png, image/jpeg, image/webp" onChange={handleBannerChange} className="hidden" /> 
                     </label>
-                    <p className="text-xs text-gray-500">Envie PNG, JPG ou WEBP (max. 2MB).</p>
+                    <p className="text-xs text-[#6b6c61]">Envie PNG, JPG ou WEBP (max. 2MB).</p>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 sm:gap-y-5">
                     <div>
-                      <label htmlFor="publicoAlvo" className="block text-sm font-medium text-gray-700">Público Alvo *</label>
-                      <select id="publicoAlvo" name="publicoAlvo" value={formData.publicoAlvo} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm disabled:bg-gray-100">
+                      <label htmlFor="publicoAlvo" className="block text-sm font-medium text-[#4a4b42]">Público Alvo *</label>
+                      <select id="publicoAlvo" name="publicoAlvo" value={formData.publicoAlvo} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-[#b8b5ad] rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm disabled:bg-[#d1cec6] bg-[#f2f0e9] text-[#2d2e26]">
                         <option value="">{optionsLoading ? "Carregando..." : "Selecione"}</option>
                         {formOptions.publicosAlvo.map(p => <option key={p} value={p}>{p.replace(/_/g, ' ')}</option>)} 
                       </select>
                     </div>
                     <div>
-                      <label htmlFor="turno" className="block text-sm font-medium text-gray-700">Turno *</label>
-                      <select id="turno" name="turno" value={formData.turno} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm disabled:bg-gray-100">
+                      <label htmlFor="turno" className="block text-sm font-medium text-[#4a4b42]">Turno *</label>
+                      <select id="turno" name="turno" value={formData.turno} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-[#b8b5ad] rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm disabled:bg-[#d1cec6] bg-[#f2f0e9] text-[#2d2e26]">
                         <option value="">{optionsLoading ? "Carregando..." : "Selecione"}</option>
                         {formOptions.turnos.map(t => <option key={t} value={t}>{t}</option>)} 
                       </select>
                     </div>
                     <div>
-                      <label htmlFor="maxPessoas" className="block text-sm font-medium text-gray-700">Nº de Vagas *</label>
-                      <input id="maxPessoas" name="maxPessoas" type="number" min="0" value={formData.maxPessoas} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm" />
+                      <label htmlFor="maxPessoas" className="block text-sm font-medium text-[#4a4b42]">Nº de Vagas *</label>
+                      <input id="maxPessoas" name="maxPessoas" type="number" min="0" value={formData.maxPessoas} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-[#b8b5ad] rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-[#f2f0e9] text-[#2d2e26]" />
                     </div>
                     <div>
-                      <label htmlFor="cargaHoraria" className="block text-sm font-medium text-gray-700">Carga Horária (h) *</label>
-                      <input id="cargaHoraria" name="cargaHoraria" type="number" min="0" value={formData.cargaHoraria} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm" />
+                      <label htmlFor="cargaHoraria" className="block text-sm font-medium text-[#4a4b42]">Carga Horária (h) *</label>
+                      <input id="cargaHoraria" name="cargaHoraria" type="number" min="0" value={formData.cargaHoraria} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-[#b8b5ad] rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-[#f2f0e9] text-[#2d2e26]" />
                     </div>
                   </div>
                 </div>
               </section>
 
-              <section className="p-5 sm:p-6 bg-white rounded-lg shadow">
-                <h2 className="text-lg sm:text-xl font-semibold mb-5 text-gray-700">Datas e Ativação</h2>
+              <section className="p-5 sm:p-6 bg-[#E6E3DC] rounded-lg shadow">
+                <h2 className="text-lg sm:text-xl font-semibold mb-5 text-[#2d2e26]">Datas e Ativação</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 sm:gap-y-5">
                   {[ 
                     {id: 'dataInicio', label: 'Início da Atividade *', value: formData.dataInicio, name: 'dataInicio'}, 
@@ -245,30 +241,30 @@ export default function TelaDeCadastroDeCurso() {
                     {id: 'dataInscFim', label: 'Fim Inscrições *', value: formData.dataInscFim, name: 'dataInscFim'} 
                   ].map(field => (
                     <div key={field.id}>
-                      <label htmlFor={field.id} className="block text-sm font-medium text-gray-700">{field.label}</label>
+                      <label htmlFor={field.id} className="block text-sm font-medium text-[#4a4b42]">{field.label}</label>
                       <div className="relative mt-1">
-                        <FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"/>
-                        <input id={field.id} name={field.name} type="date" value={field.value} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
+                        <FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-[#6b6c61] pointer-events-none"/>
+                        <input id={field.id} name={field.name} type="date" value={field.value} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-[#b8b5ad] rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-[#f2f0e9] text-[#2d2e26]"/>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="mt-6 flex items-center">
                     <input id="ativo" name="ativo" type="checkbox" checked={formData.ativo} onChange={handleChange} className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-offset-1 focus:ring-green-500" />
-                    <label htmlFor="ativo" className="ml-2 block text-sm font-medium text-gray-700">Ativar atividade e abrir inscrições ao salvar</label>
+                    <label htmlFor="ativo" className="ml-2 block text-sm font-medium text-[#4a4b42]">Ativar atividade e abrir inscrições ao salvar</label>
                 </div>
               </section>
             </main>
           </form>
         </div>
-        <footer className="flex-shrink-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] p-4 sticky bottom-0 z-10 border-t border-gray-200">
+        <footer className="flex-shrink-0 bg-[#E6E3DC] shadow-[0_-2px_10px_rgba(0,0,0,0.05)] p-4 sticky bottom-0 z-10 border-t border-[#b8b5ad]">
           <div className="max-w-4xl mx-auto flex flex-col-reverse sm:flex-row justify-end items-center gap-3">
             <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
               <button 
                 type="button" 
                 onClick={resetForm} 
                 disabled={isSubmitting} 
-                className="w-full sm:w-auto px-5 py-2 bg-gray-200 text-gray-700 font-medium rounded-md transition-colors hover:bg-gray-300 disabled:opacity-60 text-sm flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-5 py-2 bg-[#d1cec6] text-[#4a4b42] font-medium rounded-md transition-colors hover:bg-[#c4c1b9] disabled:opacity-60 text-sm flex items-center justify-center gap-2"
               > 
                 <FiRotateCcw className="w-4 h-4"/> Limpar
               </button>

@@ -95,7 +95,8 @@ export default function TelaDeSolicitacaoHortas() {
 
   return (
     <main className="relative flex-1 bg-[#A9AD99] pt-8 sm:pt-12 p-2.5 sm:p-4 md:p-6 min-h-screen font-openSans">
-      <div className="mx-auto w-full max-w-5xl bg-[#E6E3DC] rounded-xl p-4 sm:p-6 shadow-xl">
+      {/* Aumentei o max-width para 7xl para que o quadrado mais claro fique maior, aproximando-se do tamanho da imagem anterior */}
+      <div className="mx-auto w-full max-w-7xl bg-[#E6E3DC] rounded-xl p-4 sm:p-6 shadow-xl">
         <div className="mb-6 pb-4 border-b border-gray-300/80">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left">
             Solicitações Pendentes
@@ -182,7 +183,7 @@ export default function TelaDeSolicitacaoHortas() {
                             state: { source: 'solicitacoes' }, // O ID agora está na URL, mas você ainda pode passar 'source' no estado se precisar
                           })
                         }
-                        className="w-full sm:w-auto mt-2 sm:mt-0 flex-shrink-0 px-4 py-2 bg-[#6D9435] text-white rounded-md hover:bg-[#5a7a2a] focus:outline-none focus:ring-2 ring-offset-1 focus:ring-[#6D9435] transition-colors font-semibold text-xs sm:text-sm shadow-sm flex items-center justify-center gap-1.5"
+                        className="w-full sm:w-auto mt-2 sm:mt-0 flex-shrink-0 px-4 py-2 bg-[#008000] text-white rounded-md hover:bg-[#015A24] focus:outline-none focus:ring-2 ring-offset-1 focus:ring-[#6D9435] transition-colors font-semibold text-xs sm:text-sm shadow-sm flex items-center justify-center gap-1.5"
                         aria-label={`Visualizar detalhes de ${req.title}`}
                     >
                     <FiEye className="w-4 h-4" />

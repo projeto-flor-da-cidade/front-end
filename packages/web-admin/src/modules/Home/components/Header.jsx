@@ -42,11 +42,14 @@ export default function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const dropdownsRef = useRef(null);
-  const userMenuRef = useRef(null);
+  // dois refs para o menu do usuário (mobile e desktop) — usamos ambos em useClickOutside
+  const userMenuRefMobile = useRef(null);
+  const userMenuRefDesktop = useRef(null);
   const mobileMenuAndBurgerRef = useRef(null);
 
   useClickOutside(dropdownsRef, () => setOpenDropdown(null));
-  useClickOutside(userMenuRef, () => setUserMenuOpen(false));
+  useClickOutside(userMenuRefMobile, () => setUserMenuOpen(false));
+  useClickOutside(userMenuRefDesktop, () => setUserMenuOpen(false));
   useClickOutside(mobileMenuAndBurgerRef, (event) => {
     if (mobileMenuAndBurgerRef.current && !mobileMenuAndBurgerRef.current.contains(event.target)) {
         setMobileOpen(false);
@@ -88,18 +91,40 @@ export default function Header() {
 
   return (
     <header ref={mobileMenuAndBurgerRef} className="fixed inset-x-0 top-0 bg-[#d9d9d9] shadow-md z-50">
-      <div className="max-w-7xl mx-auto h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
-        
-        <Link to="/app/home" className="flex flex-col items-start focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#699530] rounded-sm">
-          <span className="text-[#699530] font-anton font-bold text-lg sm:text-xl md:text-2xl leading-none">
+      <div className="relative max-w-7xl mx-auto h-16 flex items-center px-4 sm:px-6 lg:px-8">
+
+        {/* ----- MOBILE LEFT: user icon (visible only on mobile) ----- */}
+        <div className="flex items-center md:hidden">
+          <div ref={userMenuRefMobile} className="relative">
+            <button onClick={() => setUserMenuOpen(o => !o)} aria-haspopup="true" aria-expanded={userMenuOpen} className="flex items-center gap-2 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#699530]">
+              <img src={userIcon} alt="Menu do usuário" className="w-9 h-9" />
+            </button>
+            {/* mobile dropdown (anchored to left) */}
+            <ul className={`absolute left-0 top-full mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-50 transition-all duration-200 ease-out origin-top-left ${userMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+              <li>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 font-open-sans text-sm text-red-600 hover:bg-red-50 rounded-md"
+                >
+                  Sair
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* ----- CENTER: title (centered on mobile, normal flow on md+) ----- */}
+        <Link to="/app/home" className="absolute left-1/2 transform -translate-x-1/2 md:static md:transform-none text-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#699530] rounded-sm">
+          <span className="text-[#699530] font-anton font-bold text-lg sm:text-xl md:text-2xl leading-none block">
             Flor da Cidade
           </span>
-          <span className="text-[#699530] font-anton font-bold text-lg sm:text-xl md:text-2xl leading-none">
+          <span className="text-[#699530] font-anton font-bold text-lg sm:text-xl md:text-2xl leading-none block">
             ADMIN
           </span>
         </Link>
 
-        <div className="flex items-center">
+        {/* ----- RIGHT: desktop nav + user + burger ----- */}
+        <div className="ml-auto flex items-center">
             <nav className="hidden md:flex items-center space-x-4" ref={dropdownsRef}>
               {headerMenu.map(({ label, items }, idx) => (
                   <div key={label} className="relative">
@@ -127,13 +152,13 @@ export default function Header() {
 
             <div className="h-6 w-px bg-gray-400 mx-4 hidden md:block" />
 
-            <div className="relative" ref={userMenuRef}>
+            {/* desktop user (visible only on md+) */}
+            <div className="relative hidden md:block" ref={userMenuRefDesktop}>
                 <button onClick={() => setUserMenuOpen(o => !o)} aria-haspopup="true" aria-expanded={userMenuOpen} className="flex items-center gap-2 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#699530]">
                   <img src={userIcon} alt="Menu do usuário" className="w-9 h-9" />
                   <span className="hidden lg:block text-sm font-medium text-gray-700">{userName}</span>
                 </button>
-                <ul className={`absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-50 transition-all duration-200 ease-out origin-top-right
-                ${userMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+                <ul className={`absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-50 transition-all duration-200 ease-out origin-top-right ${userMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
                   <li>
                       <button
                         onClick={handleLogout}
@@ -144,16 +169,17 @@ export default function Header() {
                   </li>
                 </ul>
             </div>
-        </div>
 
-        <button
-          className="md:hidden text-gray-700 focus:outline-none ml-4"
-          onClick={() => setMobileOpen(o => !o)}
-          aria-label="Abrir menu"
-          aria-expanded={mobileOpen}
-        >
-          {mobileOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-        </button>
+            {/* burger (mobile) */}
+            <button
+              className="md:hidden text-gray-700 focus:outline-none ml-4"
+              onClick={() => setMobileOpen(o => !o)}
+              aria-label="Abrir menu"
+              aria-expanded={mobileOpen}
+            >
+              {mobileOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+            </button>
+        </div>
       </div>
 
       <div className={`md:hidden bg-white border-t border-gray-200 shadow-lg transition-max-height duration-300 ease-in-out overflow-y-auto ${mobileOpen ? 'max-h-[calc(100vh-4rem)]' : 'max-h-0'}`}>
