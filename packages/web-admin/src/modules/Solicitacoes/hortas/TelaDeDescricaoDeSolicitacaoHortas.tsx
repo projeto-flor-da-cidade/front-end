@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import api, { BACKEND_URL } from '../../../services/api';
 
 // --- Assets e Estilos ---
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import placeholderHorta from '../../../assets/images/folhin.png';
+import placeholderHorta from '../../../assets/images/folhin.png'; // Com o declarations.d.ts, este erro some.
 
 // --- Ícones ---
 import {
@@ -14,18 +14,26 @@ import {
   FiImage, FiMessageSquare
 } from 'react-icons/fi';
 
+// --- Tipos e Hooks ---
+import { useHorta } from '../../../hooks/useHorta'; // Lembre-se de renomear para .ts
+import { StatusHorta } from '../../../types'; 
+
 // --- Constantes e Utilitários ---
 const LOCAL_FALLBACK_IMAGE = placeholderHorta;
 
-const HORTA_STATUS = { ATIVA: 'ATIVA', INATIVA: 'INATIVA', PENDENTE: 'PENDENTE', VISITA_AGENDADA: 'VISITA_AGENDADA' };
-const HORTA_STATUS_CONFIG = {
-  [HORTA_STATUS.ATIVA]: { label: 'Ativa', Icon: FiCheckCircle, color: 'text-green-700 bg-green-100' },
-  [HORTA_STATUS.INATIVA]: { label: 'Inativa/Recusada', Icon: FiXCircle, color: 'text-red-700 bg-red-100' },
-  [HORTA_STATUS.PENDENTE]: { label: 'Pendente', Icon: FiClock, color: 'text-yellow-700 bg-yellow-100' },
-  [HORTA_STATUS.VISITA_AGENDADA]: { label: 'Visita Agendada', Icon: FiCalendar, color: 'text-blue-700 bg-blue-100' },
+const HORTA_STATUS: { [key: string]: StatusHorta } = { 
+  ATIVA: 'ATIVA', INATIVA: 'INATIVA', PENDENTE: 'PENDENTE', VISITA_AGENDADA: 'VISITA_AGENDADA' 
 };
 
-const formatDate = (dateString) => {
+// CORREÇÃO APLICADA AQUI
+const HORTA_STATUS_CONFIG = {
+  'ATIVA': { label: 'Ativa', Icon: FiCheckCircle, color: 'text-green-700 bg-green-100' },
+  'INATIVA': { label: 'Inativa/Recusada', Icon: FiXCircle, color: 'text-red-700 bg-red-100' },
+  'PENDENTE': { label: 'Pendente', Icon: FiClock, color: 'text-yellow-700 bg-yellow-100' },
+  'VISITA_AGENDADA': { label: 'Visita Agendada', Icon: FiCalendar, color: 'text-blue-700 bg-blue-100' },
+};
+
+const formatDate = (dateString?: string): string => {
   if (!dateString) return 'N/A';
   try {
     const date = new Date(dateString);
@@ -34,13 +42,18 @@ const formatDate = (dateString) => {
   } catch (_e) { return dateString; }
 };
 
-const getImageUrl = (imageUrlFromDto) => {
+const getImageUrl = (imageUrlFromDto?: string): string => {
   if (imageUrlFromDto) return `${BACKEND_URL}${imageUrlFromDto.replace('/api', '')}`;
   return LOCAL_FALLBACK_IMAGE;
 };
 
-// --- Componentes Reutilizáveis de UI ---
-const Section = ({ title, icon: Icon, children }) => (
+// --- Componentes Reutilizáveis de UI (Tipados) ---
+type SectionProps = {
+  title: string;
+  icon: React.ElementType;
+  children: React.ReactNode;
+};
+const Section: React.FC<SectionProps> = ({ title, icon: Icon, children }) => (
   <section className="bg-white p-5 rounded-xl shadow-lg">
     <h2 className="text-lg font-semibold text-[#254117] mb-4 flex items-center">
       <Icon className="mr-2.5 text-[#6D9435] w-5 h-5" /> {title}
@@ -49,13 +62,21 @@ const Section = ({ title, icon: Icon, children }) => (
   </section>
 );
 
-const InfoGrid = ({ children, cols = 2 }) => (
-  <div className={`grid grid-cols-1 sm:grid-cols-${cols} gap-x-5 gap-y-3 text-sm`}>
-    {children}
-  </div>
+type InfoGridProps = {
+  children: React.ReactNode;
+  cols?: number;
+};
+const InfoGrid: React.FC<InfoGridProps> = ({ children, cols = 2 }) => (
+  <div className={`grid grid-cols-1 sm:grid-cols-${cols} gap-x-5 gap-y-3 text-sm`}>{children}</div>
 );
 
-const InfoItem = ({ label, value, href, children }) => (
+type InfoItemProps = {
+  label: string;
+  value?: string | number | null;
+  href?: string;
+  children?: React.ReactNode;
+};
+const InfoItem: React.FC<InfoItemProps> = ({ label, value, href, children }) => (
   <div>
     <strong className="text-gray-500 font-medium">{label}:</strong>{' '}
     {children || (href ? (
@@ -66,53 +87,39 @@ const InfoItem = ({ label, value, href, children }) => (
   </div>
 );
 
-const ActionButton = ({ icon: Icon, text, onClick, isSubmitting, color = 'gray', href }) => {
-  const colorMap = {
-    blue: 'bg-blue-600 hover:bg-blue-700',
-    green: 'bg-green-600 hover:bg-green-700',
-    red: 'bg-red-600 hover:bg-red-700',
-    whatsapp: 'bg-[#1f9a3a] hover:bg-[#16832b]',
-    gray: 'bg-gray-600 hover:bg-gray-700'
-  };
+type ActionButtonProps = {
+  icon: React.ElementType;
+  text: string;
+  onClick?: () => void;
+  isSubmitting?: boolean;
+  color?: 'blue' | 'green' | 'red' | 'whatsapp' | 'gray';
+  href?: string;
+};
+const ActionButton: React.FC<ActionButtonProps> = ({ icon: Icon, text, onClick, isSubmitting, color = 'gray', href }) => {
+  const colorMap = { blue: 'bg-blue-600 hover:bg-blue-700', green: 'bg-green-600 hover:bg-green-700', red: 'bg-red-600 hover:bg-red-700', whatsapp: 'bg-[#1f9a3a] hover:bg-[#16832b]', gray: 'bg-gray-600 hover:bg-gray-700' };
   const classes = `w-full flex items-center justify-center gap-2 px-4 py-2 text-white rounded-md transition-colors text-sm font-medium disabled:opacity-70 ${colorMap[color] || colorMap.gray}`;
-  const content = (<>{isSubmitting ? <FiLoader className="animate-spin w-5 h-5" /> : <Icon className="w-5 h-5" />}{text}</>);
+  const content = <>{isSubmitting ? <FiLoader className="animate-spin w-5 h-5" /> : <Icon className="w-5 h-5" />}{text}</>;
   return href ? <a href={href} target="_blank" rel="noopener noreferrer" className={classes}>{content}</a> : <button onClick={onClick} disabled={isSubmitting} className={classes}>{content}</button>;
 };
 
 // --- Componente Principal ---
 export default function TelaDeDescricaoDeSolicitacaoHortas() {
-  const { id: hortaId } = useParams();
+  const { id: hortaId } = useParams<{ id: string }>(); // Tipamos o retorno de useParams
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [horta, setHorta] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // O hook agora retorna 'horta' com o tipo 'Horta | null', 'error' como 'string | null', etc.
+  const { horta, isLoading, error, setHorta } = useHorta(hortaId);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isImageModalOpen, setImageModalOpen] = useState(false);
   
   const imageUrl = useMemo(() => getImageUrl(horta?.imageUrl), [horta?.imageUrl]);
-  const statusInfo = useMemo(() => HORTA_STATUS_CONFIG[horta?.statusHorta] || { label: horta?.statusHorta, color: 'text-gray-800 bg-gray-200' }, [horta?.statusHorta]);
+  const statusInfo = useMemo(() => (horta ? HORTA_STATUS_CONFIG[horta.statusHorta] : { label: 'Carregando...', color: 'text-gray-800 bg-gray-200' }), [horta]);
   
-  const fetchHortaDetails = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await api.get(`/hortas/${hortaId}`);
-      setHorta(response.data);
-    } catch (err) {
-      setError("Não foi possível carregar os detalhes da horta.");
-      toast.error("Falha ao carregar detalhes. Verifique o ID e sua conexão.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [hortaId]);
-
-  useEffect(() => {
-    fetchHortaDetails();
-  }, [fetchHortaDetails]);
-
-  const handleStatusUpdate = useCallback(async (newStatus) => {
+  const handleStatusUpdate = useCallback(async (newStatus: StatusHorta) => { // O parâmetro agora é tipado
+    if (!horta) return; // Type guard para garantir que horta não é null
+    
     setIsSubmitting(true);
     try {
       const response = await api.patch(`/hortas/${horta.idHorta}/status?status=${newStatus}`);
@@ -120,6 +127,7 @@ export default function TelaDeDescricaoDeSolicitacaoHortas() {
       const newStatusLabel = HORTA_STATUS_CONFIG[updatedHorta.statusHorta]?.label || updatedHorta.statusHorta;
       toast.success(`Status da horta atualizado para "${newStatusLabel}"!`);
       setHorta(updatedHorta);
+
       setTimeout(() => {
         const source = location.state?.source;
         navigate(source === 'solicitacoes' ? '/app/tela-de-solicitacao-hortas' : '/app/tela-hortas-ativas');
@@ -129,7 +137,7 @@ export default function TelaDeDescricaoDeSolicitacaoHortas() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [horta, navigate, location.state]);
+  }, [horta, navigate, location.state, setHorta]);
   
   const handleWhatsAppClick = useCallback(() => {
     if (!horta?.telefoneUsuario) return toast.warn("Telefone do solicitante não disponível.");
@@ -140,30 +148,20 @@ export default function TelaDeDescricaoDeSolicitacaoHortas() {
   }, [horta]);
 
   if (isLoading) return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#A9AD99]">
-      <FiLoader className="animate-spin text-4xl text-[#E6E3DC]" />
-      <p className="mt-3 text-gray-800">Carregando...</p>
-    </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#A9AD99]"><FiLoader className="animate-spin text-4xl text-[#E6E3DC]" /><p className="mt-3 text-gray-800">Carregando...</p></div>
   );
 
   if (error || !horta) return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center p-4 bg-[#A9AD99]">
-      <FiAlertCircle className="text-4xl text-red-500 mb-3" />
-      <p className="font-semibold text-gray-800">{error || "Horta não encontrada."}</p>
-      <button onClick={() => navigate(-1)} className="mt-4 px-4 py-2 bg-gray-600 text-white rounded">Voltar</button>
-    </div>
+    <div className="flex flex-col items-center justify-center min-h-screen text-center p-4 bg-[#A9AD99]"><FiAlertCircle className="text-4xl text-red-500 mb-3" /><p className="font-semibold text-gray-800">{error || "Horta não encontrada."}</p><button onClick={() => navigate(-1)} className="mt-4 px-4 py-2 bg-gray-600 text-white rounded">Voltar</button></div>
   );
 
   return (
     <div className="min-h-screen bg-[#A9AD99] font-poppins pt-10 sm:pt-16 pb-10">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} theme="colored" />
       <div className="container mx-auto px-3 sm:px-4">
-        {/* PAINEL CENTRAL - MAIOR (aprox. equivalente ao traçado vermelho) */}
         <div className="mx-auto w-full max-w-[1800px] bg-[#E6E3DC] rounded-xl p-6 sm:px-8 shadow-xl">
           <header className="mb-8 pb-4 text-center md:text-left border-b border-gray-200">
-            <button onClick={() => navigate(-1)} className="text-sm text-blue-600 hover:underline mb-2 inline-flex items-center">
-              <FiChevronLeft /> Voltar
-            </button>
+            <button onClick={() => navigate(-1)} className="text-sm text-blue-600 hover:underline mb-2 inline-flex items-center"><FiChevronLeft /> Voltar</button>
             <p className="text-xs text-gray-600 uppercase">Solicitação #{horta.idHorta}</p>
             <h1 className="text-3xl font-bold text-[#254117] mt-1 break-words">{horta.nomeHorta}</h1>
             <div className={`mt-2 inline-block px-3 py-1 text-xs font-semibold rounded-full ${statusInfo.color}`}>Status: {statusInfo.label}</div>
@@ -180,7 +178,7 @@ export default function TelaDeDescricaoDeSolicitacaoHortas() {
                   <InfoItem label="Nascimento" value={formatDate(horta.dataNascimentoUsuario)} />
                   <InfoItem label="Escolaridade" value={horta.escolaridadeUsuario?.replace(/_/g, ' ')} />
                   <InfoItem label="Endereço" value={horta.enderecoUsuario} />
-                  <InfoItem label="Status" value={horta.ativoUsuario ? 'Ativo' : 'Inativo'} />
+                  <InfoItem label="Status"><span className={horta.ativoUsuario ? 'text-green-700' : 'text-red-700'}>{horta.ativoUsuario ? 'Ativo' : 'Inativo'}</span></InfoItem>
                   <InfoItem label="Função na Horta" value={horta.funcaoUniEnsino} />
                 </InfoGrid>
               </Section>
@@ -209,10 +207,8 @@ export default function TelaDeDescricaoDeSolicitacaoHortas() {
             <aside className="lg:sticky lg:top-20 self-start space-y-6">
               <Section title="Imagem" icon={FiImage}>
                 <div className="relative group cursor-pointer" onClick={() => setImageModalOpen(true)}>
-                  <img src={imageUrl} alt={`Horta ${horta.nomeHorta}`} className="w-full aspect-video object-cover rounded-lg bg-gray-200" onError={(e) => { e.target.src = LOCAL_FALLBACK_IMAGE; }} />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center">
-                    <FiMaximize2 className="text-white w-8 h-8 opacity-0 group-hover:opacity-100 transition" />
-                  </div>
+                  <img src={imageUrl} alt={`Horta ${horta.nomeHorta}`} className="w-full aspect-video object-cover rounded-lg bg-gray-200" onError={(e) => { (e.target as HTMLImageElement).src = LOCAL_FALLBACK_IMAGE; }} />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center"><FiMaximize2 className="text-white w-8 h-8 opacity-0 group-hover:opacity-100 transition" /></div>
                 </div>
               </Section>
               
@@ -242,4 +238,3 @@ export default function TelaDeDescricaoDeSolicitacaoHortas() {
     </div>
   );
 }
-
