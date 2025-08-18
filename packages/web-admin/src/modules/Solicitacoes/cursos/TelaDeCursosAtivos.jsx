@@ -1,6 +1,6 @@
 // Caminho do Arquivo: seu-projeto-frontend/src/pages/TelaDeCursosAtivos.jsx
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'; // <-- CORREÇÃO APLICADA AQUI
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../../services/api'; 
 
@@ -34,7 +34,7 @@ const STATUS_CONFIG = {
 };
 
 const getStatusDisplayProps = (isAtivo) => {
-  const config = STATUS_CONFIG[isAtivo] || { label: 'Desconhecido', icon: FiAlertCircle, colorClass: 'text-gray-700 bg-gray-100' };
+  const config = STATUS_CONFIG[isAtivo] || { label: 'Desconhecido', icon: FiAlertCircle, colorClass: 'text-[#4a4b42] bg-[#d1cec6]' };
   return {
     label: config.label,
     Icon: config.icon, 
@@ -130,13 +130,13 @@ export default function TelaDeCursosAtivos() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#F0F2EB] font-poppins">
+      <div className="flex flex-col min-h-screen bg-[#A9AD99] font-poppins">
         <Header title="Gerenciamento de Cursos" />
         <div className="flex flex-1 items-center justify-center text-center p-10">
-          <FiLoader className="w-12 h-12 text-green-600 animate-spin mr-4" />
+          <FiLoader className="w-12 h-12 text-gray-600 animate-spin mr-4" />
           <div>
-            <p className="text-xl font-semibold text-gray-700">Carregando Cursos...</p>
-            <p className="text-sm text-gray-500">Por favor, aguarde.</p>
+            <p className="text-xl font-semibold text-[#2d2e26]">Carregando Cursos...</p>
+            <p className="text-sm text-[#4a4b42]">Por favor, aguarde.</p>
           </div>
         </div>
       </div>
@@ -145,9 +145,9 @@ export default function TelaDeCursosAtivos() {
 
   if (error && allCursos.length === 0) {
     return (
-      <div className="flex flex-col min-h-screen bg-[#F0F2EB] font-poppins">
+      <div className="flex flex-col min-h-screen bg-[#A9AD99] font-poppins">
         <Header title="Gerenciamento de Cursos" />
-        <div className="flex flex-1 items-center justify-center text-center p-6 m-6 bg-white rounded-xl shadow-lg">
+        <div className="flex flex-1 items-center justify-center text-center p-6 m-6 bg-[#E6E3DC] rounded-xl shadow-lg">
           <div className="flex flex-col items-center">
             <FiAlertCircle className="w-12 h-12 text-red-500 mb-4" />
             <p className="text-xl font-semibold text-red-700">Erro ao Carregar Cursos</p>
@@ -165,27 +165,38 @@ export default function TelaDeCursosAtivos() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 font-poppins">
+    <div className="min-h-screen bg-[#A9AD99] font-poppins">
       <Header title="Gerenciamento de Cursos" />
       <ToastContainer position="bottom-right" autoClose={3500} theme="colored" />
       
       <main className="container mx-auto p-4 sm:p-6 lg:p-8 pt-6 sm:pt-8">
-        <header className="mb-6 sm:mb-8 p-5 sm:p-6 bg-white rounded-xl shadow-lg">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Gerenciamento de Cursos</h1>
-            <p className="text-sm text-gray-600 mt-1">Visualize e gerencie todos os cursos registrados no sistema.</p>
+        <header className="mb-6 sm:mb-8 p-5 sm:p-6 bg-[#E6E3DC] rounded-xl shadow-lg">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#2d2e26]">Gerenciamento de Cursos</h1>
+            <p className="text-sm text-[#4a4b42] mt-1">Visualize e gerencie todos os cursos registrados no sistema.</p>
         </header>
 
-        <section className="mb-6 sm:mb-8 p-5 bg-white rounded-xl shadow-lg">
+        <section className="mb-6 sm:mb-8 p-5 bg-[#E6E3DC] rounded-xl shadow-lg">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="relative flex-grow lg:max-w-md">
-              <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input type="text" placeholder="Buscar por nome..." value={search} onChange={e => setSearch(e.target.value)} className="w-full h-11 pl-10 pr-4 border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500" />
+              <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6b6c61]" />
+              <input 
+                type="text" 
+                placeholder="Buscar por nome..." 
+                value={search} 
+                onChange={e => setSearch(e.target.value)} 
+                className="w-full h-11 pl-10 pr-4 border border-[#b8b5ad] rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 bg-[#f2f0e9] text-[#2d2e26]" 
+              />
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6">
               <div className="flex items-center gap-2 w-full sm:w-auto">
-                <FiFilter className="text-gray-500 w-5 h-5" />
-                <label htmlFor="status-filter" className="text-sm font-medium text-gray-700">Status:</label>
-                <select id="status-filter" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-11 border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500">
+                <FiFilter className="text-[#4a4b42] w-5 h-5" />
+                <label htmlFor="status-filter" className="text-sm font-medium text-[#4a4b42]">Status:</label>
+                <select 
+                  id="status-filter" 
+                  value={statusFilter} 
+                  onChange={e => setStatusFilter(e.target.value)} 
+                  className="h-11 border border-[#b8b5ad] rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 bg-[#f2f0e9] text-[#2d2e26]"
+                >
                   <option value="TODOS">Todos</option>
                   <option value="true">Somente Ativos</option>
                   <option value="false">Somente Inativos</option>
@@ -202,21 +213,42 @@ export default function TelaDeCursosAtivos() {
               const oppositeStatus = curso.ativo ? STATUS_CONFIG.false : STATUS_CONFIG.true;
               
               return (
-                <div key={curso.idCurso} className="bg-white border border-gray-200 rounded-xl shadow-md transition-shadow hover:shadow-lg">
+                <div key={curso.idCurso} className="bg-[#E6E3DC] border border-[#b8b5ad] rounded-xl shadow-md transition-shadow hover:shadow-lg">
                   <div className="flex justify-between items-center text-left p-4 cursor-pointer" onClick={() => navigate(`/app/tela-de-inscritos/${curso.idCurso}`)}>
                     <div className="flex-grow pr-4">
-                      <h2 className="text-lg font-semibold text-green-700">{curso.nome}</h2>
-                      <p className="text-xs text-gray-500">{formatDate(curso.dataInicio)} - {formatDate(curso.dataFim)}</p>
+                      <h2 className="text-lg font-semibold text-[#2d2e26]">{curso.nome}</h2>
+                      <p className="text-xs text-[#4a4b42]">{formatDate(curso.dataInicio)} - {formatDate(curso.dataFim)}</p>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className={className}><Icon className="mr-1.5" />{label}</div>
-                      <Link to={`/app/tela-de-edicao-de-cursos/${curso.idCurso}`} onClick={(e) => e.stopPropagation()} className="p-2 text-gray-500 hover:text-blue-600 rounded-full transition-colors"><FiEdit3 /></Link>
+                      <Link 
+                        to={`/app/tela-de-edicao-de-cursos/${curso.idCurso}`} 
+                        onClick={(e) => e.stopPropagation()} 
+                        className="p-2 text-[#4a4b42] hover:text-blue-600 rounded-full transition-colors"
+                      >
+                        <FiEdit3 />
+                      </Link>
                       <div ref={el => dropdownRefs.current[curso.idCurso] = el} className="relative">
-                          <button type="button" onClick={(e) => { e.stopPropagation(); setActiveDropdownId(activeDropdownId === curso.idCurso ? null : curso.idCurso); }} className="p-2 text-gray-500 hover:text-gray-800 rounded-full transition-colors"><FiChevronDown /></button>
+                          <button 
+                            type="button" 
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              setActiveDropdownId(activeDropdownId === curso.idCurso ? null : curso.idCurso); 
+                            }} 
+                            className="p-2 text-[#4a4b42] hover:text-[#2d2e26] rounded-full transition-colors"
+                          >
+                            <FiChevronDown />
+                          </button>
                           {activeDropdownId === curso.idCurso && (
-                            <div className="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                            <div className="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-[#E6E3DC] ring-1 ring-[#b8b5ad] z-10">
                               <div className="py-1">
-                                <button onClick={(e) => { e.stopPropagation(); handleStatusChange(curso, oppositeStatus.value); }} className={`group flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 ${oppositeStatus.hoverClass}`}>
+                                <button 
+                                  onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    handleStatusChange(curso, oppositeStatus.value); 
+                                  }} 
+                                  className={`group flex items-center w-full px-4 py-2 text-sm text-left text-[#2d2e26] ${oppositeStatus.hoverClass}`}
+                                >
                                   <oppositeStatus.icon className="mr-3" />
                                   {oppositeStatus.label === 'Ativo' ? 'Ativar Curso' : 'Inativar Curso'}
                                 </button>
@@ -231,20 +263,26 @@ export default function TelaDeCursosAtivos() {
             })}
           </div>
         ) : (
-          <div className="text-center py-16 bg-white rounded-xl shadow-lg"> 
-            <FiInbox className="w-16 h-16 text-gray-400 mx-auto mb-5" />
-            <h3 className="text-xl font-semibold text-gray-700">Nenhum Curso Encontrado</h3>
-            <p className="text-gray-500 mt-2 text-sm">
+          <div className="text-center py-16 bg-[#E6E3DC] rounded-xl shadow-lg"> 
+            <FiInbox className="w-16 h-16 text-[#6b6c61] mx-auto mb-5" />
+            <h3 className="text-xl font-semibold text-[#2d2e26]">Nenhum Curso Encontrado</h3>
+            <p className="text-[#4a4b42] mt-2 text-sm">
               {search ? "Nenhum curso corresponde à sua busca." : "Não há cursos para exibir com os filtros atuais."}
             </p>
           </div>
         )}
 
         {filteredAndSortedCursos.length > 0 && ( 
-            <footer className="mt-8 sm:mt-10 flex justify-center items-center space-x-1 sm:space-x-2 p-4 bg-white rounded-xl shadow-lg">
-                <button className="p-2 rounded-full hover:bg-gray-100 text-gray-400 disabled:opacity-50" disabled><FiChevronLeft className="w-5 h-5" /></button>
-                <span className="text-sm font-semibold text-green-600 px-3.5 py-1.5 bg-green-100 rounded-md">Página 1</span>
-                <button className="p-2 rounded-full hover:bg-gray-100 text-gray-400 disabled:opacity-50" disabled><FiChevronRight className="w-5 h-5" /></button>
+            <footer className="mt-8 sm:mt-10 flex justify-center items-center space-x-1 sm:space-x-2 p-4 bg-[#E6E3DC] rounded-xl shadow-lg">
+                <button className="p-2 rounded-full hover:bg-[#d1cec6] text-[#4a4b42] disabled:opacity-50" disabled>
+                  <FiChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="text-sm font-semibold text-green-600 px-3.5 py-1.5 bg-green-100 rounded-md">
+                  Página 1
+                </span>
+                <button className="p-2 rounded-full hover:bg-[#d1cec6] text-[#4a4b42] disabled:opacity-50" disabled>
+                  <FiChevronRight className="w-5 h-5" />
+                </button>
             </footer>
         )}
       </main>

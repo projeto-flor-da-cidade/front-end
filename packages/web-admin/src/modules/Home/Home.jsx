@@ -21,7 +21,7 @@ export default function Home() {
     //    disponível abaixo do header (altura da tela - 4rem do header).
     // 3. grid place-items-center: A forma mais robusta de centralizar um único item
     //    (o contêiner do card) tanto na vertical quanto na horizontal.
-    <div className="bg-[#a9af93] min-h-[calc(100vh-4rem)] grid place-items-center p-4 sm:p-6">
+    <div className="bg-[#A9AD99] min-h-[calc(100vh-4rem)] grid place-items-center p-4 sm:p-6">
       
       {/* 
         Este contêiner-filho é o que será centralizado pelo grid acima.
@@ -40,7 +40,7 @@ export default function Home() {
 
         {/* Card de boas-vindas: o conteúdo visível. */}
         <section 
-          className="relative z-10 w-full max-w-4xl rounded-lg bg-[#d9d9d9]/80 backdrop-blur-sm shadow-lg p-6 text-start sm:p-8 md:p-10 animate-fade-in-up mt-50"
+          className="relative z-10 w-full max-w-4xl rounded-lg bg-[#E6E3DC]/80 backdrop-blur-sm shadow-lg p-6 text-start sm:p-8 md:p-10 animate-fade-in-up mt-50"
         >
           <h1 className="font-poppins font-bold text-xl sm:text-2xl md:text-3xl text-gray-900 mb-2">
             Boas-vindas, {usuario?.nome || 'Admin'}!

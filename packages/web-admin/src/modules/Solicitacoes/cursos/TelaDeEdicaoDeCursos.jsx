@@ -180,94 +180,98 @@ export default function TelaDeEdicaoDeCursos() {
     }
   }, [id, navigate, formData, bannerFile, SERVER_PLACEHOLDER_URL]);
 
-  // JSX para loading e error states (sem alterações)
+  // JSX para loading e error states (sem alterações na lógica, apenas visuais)
   if (loading || !formData) { 
     return (
-      <div className="flex flex-col min-h-screen items-center justify-center p-4">
-        <FiLoader className="animate-spin text-5xl text-green-600" />
-        <p className="mt-4 text-lg text-gray-600">Carregando dados do curso...</p>
+      <div className="flex flex-col min-h-screen items-center justify-center p-4 bg-[#A9AD99]">
+        <FiLoader className="animate-spin text-5xl text-gray-700" />
+        <p className="mt-4 text-lg text-gray-900">Carregando dados do curso...</p>
       </div>
     );
   }
 
   if (error) { 
     return (
-      <div className="flex flex-col min-h-screen items-center justify-center p-4 text-center">
-        <FiAlertCircle className="text-5xl text-red-500 mb-3" />
-        <p className="text-lg font-semibold text-red-600">Erro ao Carregar</p>
-        <span className="text-red-500">{error}</span>
-        <button 
-          onClick={() => window.location.reload()}
-          className="mt-6 px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-        >
-          Tentar Novamente
-        </button>
-        <button 
-          onClick={() => navigate(-1)} 
-          className="mt-3 px-5 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
-        >
-          Voltar
-        </button>
+      <div className="flex flex-col min-h-screen items-center justify-center p-4 text-center bg-[#A9AD99]">
+        <div className="bg-[#E6E3DC] p-6 rounded-lg shadow-lg max-w-md">
+          <FiAlertCircle className="text-5xl text-red-600 mb-3 mx-auto" />
+          <p className="text-lg font-semibold text-red-600">Erro ao Carregar</p>
+          <span className="text-red-600 block mt-2">{error}</span>
+          <div className="mt-6 flex justify-center gap-3">
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            >
+              Tentar Novamente
+            </button>
+            <button 
+              onClick={() => navigate(-1)} 
+              className="px-5 py-2 bg-[#E6E3DC] text-gray-900 rounded-md hover:bg-[#e0dbcf] transition border"
+            >
+              Voltar
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
   
-  // JSX do return principal do formulário (sem alterações na estrutura)
+  // JSX do return principal do formulário (visuais atualizados)
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div className="flex flex-col min-h-screen bg-[#A9AD99]">
       {/* <Header title="Edição de Curso" /> */}
       <ToastContainer position="top-right" autoClose={3500} theme="colored" hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       
       <div className="flex-grow flex flex-col">
         <div className="flex-grow overflow-y-auto p-4 sm:p-6 lg:p-8">
           <form onSubmit={handleSubmit} id="edit-curso-form" className="max-w-4xl mx-auto space-y-8">
-            <header className="pb-6 border-b border-gray-200">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                Editando Atividade: <span className="text-green-600">{originalCurso?.nome || ''}</span>
+            <header className="pb-6 border-b border-gray-300">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Editando Atividade: <span className="text-green-800">{originalCurso?.nome || ''}</span>
               </h1>
-              <p className="text-md text-gray-500 mt-1">Modifique as informações da atividade abaixo.</p>
+              <p className="text-md text-gray-800 mt-1">Modifique as informações da atividade abaixo.</p>
             </header>
             
             <main className="space-y-6">
-              <section className="p-5 sm:p-6 bg-white rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-5 text-gray-700">Informações Principais</h2>
+              <section className="p-5 sm:p-6 bg-[#E6E3DC] rounded-lg shadow">
+                <h2 className="text-xl font-semibold mb-5 text-gray-900">Informações Principais</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Atividade</label>
-                        <div className="flex space-x-3 p-1.5 bg-gray-100 rounded-md">
-                        {optionsLoading ? <p className="text-sm text-gray-500 p-2">Carregando tipos...</p> : formOptions.tiposAtividade.length > 0 ? formOptions.tiposAtividade.map((type) => ( 
-                            <label key={type} className={`flex-1 text-center py-2 px-3 rounded-md cursor-pointer transition-colors text-xs sm:text-sm ${formData.tipoAtividade === type ? 'bg-green-600 text-white shadow-md' : 'hover:bg-gray-200'}`}>
+                        <label className="block text-sm font-medium text-gray-900 mb-1">Tipo de Atividade</label>
+                        <div className="flex space-x-3 p-1.5 bg-[#E6E3DC] rounded-md">
+                        {optionsLoading ? <p className="text-sm text-gray-800 p-2">Carregando tipos...</p> : formOptions.tiposAtividade.length > 0 ? formOptions.tiposAtividade.map((type) => ( 
+                            <label key={type} className={`flex-1 text-center py-2 px-3 rounded-md cursor-pointer transition-colors text-xs sm:text-sm ${formData.tipoAtividade === type ? 'bg-green-700 text-white shadow-md' : 'hover:bg-[#e0dbcf] text-gray-900'}`}>
                             <input type="radio" name="tipoAtividade" value={type} checked={formData.tipoAtividade === type} onChange={handleChange} className="sr-only"/> 
                             {type}
                             </label>
-                        )) : <p className="text-sm text-gray-500 p-2">Nenhum tipo disponível.</p>}
+                        )) : <p className="text-sm text-gray-800 p-2">Nenhum tipo disponível.</p>}
                         </div>
                     </div>
                     <div className="md:col-span-2">
-                        <label htmlFor="nome" className="block text-sm font-medium text-gray-700">Nome da Atividade</label>
-                        <input id="nome" name="nome" type="text" value={formData.nome} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
+                        <label htmlFor="nome" className="block text-sm font-medium text-gray-900">Nome da Atividade</label>
+                        <input id="nome" name="nome" type="text" value={formData.nome} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/>
                     </div>
                     <div className="md:col-span-2">
-                        <label htmlFor="descricao" className="block text-sm font-medium text-gray-700">Descrição</label>
-                        <textarea id="descricao" name="descricao" value={formData.descricao} onChange={handleChange} required rows="4" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
+                        <label htmlFor="descricao" className="block text-sm font-medium text-gray-900">Descrição</label>
+                        <textarea id="descricao" name="descricao" value={formData.descricao} onChange={handleChange} required rows="4" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/>
                     </div>
                     <div>
-                        <label htmlFor="local" className="block text-sm font-medium text-gray-700">Local</label>
-                        <input id="local" name="local" type="text" value={formData.local} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
+                        <label htmlFor="local" className="block text-sm font-medium text-gray-900">Local</label>
+                        <input id="local" name="local" type="text" value={formData.local} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/>
                     </div>
                     <div>
-                        <label htmlFor="instituicao" className="block text-sm font-medium text-gray-700">Instituição</label>
-                        <input id="instituicao" name="instituicao" type="text" value={formData.instituicao} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/>
+                        <label htmlFor="instituicao" className="block text-sm font-medium text-gray-900">Instituição</label>
+                        <input id="instituicao" name="instituicao" type="text" value={formData.instituicao} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/>
                     </div>
                 </div>
               </section>
 
-              <section className="p-5 sm:p-6 bg-white rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-5 text-gray-700">Detalhes da Atividade</h2>
+              <section className="p-5 sm:p-6 bg-[#E6E3DC] rounded-lg shadow">
+                <h2 className="text-xl font-semibold mb-5 text-gray-900">Detalhes da Atividade</h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-5 items-start">
                   <div className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-700">Banner da Atividade</label>
-                    <div className="w-full h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center overflow-hidden relative group">
+                    <label className="block text-sm font-medium text-gray-900">Banner da Atividade</label>
+                    <div className="w-full h-48 bg-[#E6E3DC] border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center overflow-hidden relative group">
                       {bannerPreview ? (
                         <img 
                           src={bannerPreview} 
@@ -283,44 +287,44 @@ export default function TelaDeEdicaoDeCursos() {
                           }} 
                         />
                       ) : (
-                        <div className="flex flex-col items-center text-gray-400 p-4 text-center">
+                        <div className="flex flex-col items-center text-gray-700 p-4 text-center">
                           <FiImage className="w-10 h-10 mb-1" />
                           <span className="text-xs">Nenhum banner selecionado</span>
                         </div>
                       )}
                     </div>
-                    <label className="w-full cursor-pointer flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm">
+                    <label className="w-full cursor-pointer flex items-center justify-center px-4 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium shadow-sm">
                       <FiUpload className="w-4 h-4 mr-2" /><span>Alterar Imagem</span>
                       <input type="file" name="bannerFile" accept="image/png, image/jpeg, image/webp" onChange={handleBannerChange} className="hidden" /> 
                     </label>
-                    <p className="text-xs text-gray-500">Envie PNG, JPG ou WEBP (max. 2MB).</p>
+                    <p className="text-xs text-gray-800">Envie PNG, JPG ou WEBP (max. 2MB).</p>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
-                      <label htmlFor="publicoAlvo" className="block text-sm font-medium text-gray-700">Público Alvo</label>
-                      <select id="publicoAlvo" name="publicoAlvo" value={formData.publicoAlvo} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm disabled:bg-gray-100"> 
+                      <label htmlFor="publicoAlvo" className="block text-sm font-medium text-gray-900">Público Alvo</label>
+                      <select id="publicoAlvo" name="publicoAlvo" value={formData.publicoAlvo} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm disabled:bg-[#E6E3DC] bg-[#E6E3DC] text-gray-900"> 
                         <option value="">{optionsLoading ? "Carregando..." : "Selecione"}</option>
                         {formOptions.publicosAlvo.map(p => <option key={p} value={p}>{p.replace(/_/g, ' ')}</option>)} 
                       </select>
                     </div>
                     <div>
-                      <label htmlFor="turno" className="block text-sm font-medium text-gray-700">Turno</label>
-                      <select id="turno" name="turno" value={formData.turno} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm disabled:bg-gray-100"> 
+                      <label htmlFor="turno" className="block text-sm font-medium text-gray-900">Turno</label>
+                      <select id="turno" name="turno" value={formData.turno} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm disabled:bg-[#E6E3DC] bg-[#E6E3DC] text-gray-900"> 
                         <option value="">{optionsLoading ? "Carregando..." : "Selecione"}</option>
                         {formOptions.turnos.map(t => <option key={t} value={t}>{t}</option>)} 
                       </select>
                     </div>
                     <div>
-                      <label htmlFor="maxPessoas" className="block text-sm font-medium text-gray-700">Nº de Vagas</label>
-                      <input id="maxPessoas" name="maxPessoas" type="number" min="0" value={formData.maxPessoas} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm" />
+                      <label htmlFor="maxPessoas" className="block text-sm font-medium text-gray-900">Nº de Vagas</label>
+                      <input id="maxPessoas" name="maxPessoas" type="number" min="0" value={formData.maxPessoas} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900" />
                     </div>
                     <div>
-                      <label htmlFor="cargaHoraria" className="block text-sm font-medium text-gray-700">Carga Horária (h)</label>
-                      <input id="cargaHoraria" name="cargaHoraria" type="number" min="0" value={formData.cargaHoraria} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm" />
+                      <label htmlFor="cargaHoraria" className="block text-sm font-medium text-gray-900">Carga Horária (h)</label>
+                      <input id="cargaHoraria" name="cargaHoraria" type="number" min="0" value={formData.cargaHoraria} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900" />
                     </div>
                     <div className="sm:col-span-2">
-                      <label htmlFor="ativo" className="block text-sm font-medium text-gray-700">Status da Atividade</label>
-                      <select id="ativo" name="ativo" value={formData.ativo.toString()} onChange={handleChange} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"> 
+                      <label htmlFor="ativo" className="block text-sm font-medium text-gray-900">Status da Atividade</label>
+                      <select id="ativo" name="ativo" value={formData.ativo.toString()} onChange={handleChange} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"> 
                         <option value="true">Ativo</option>
                         <option value="false">Inativo</option>
                       </select>
@@ -329,46 +333,46 @@ export default function TelaDeEdicaoDeCursos() {
                 </div>
               </section>
 
-              <section className="p-5 sm:p-6 bg-white rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-5 text-gray-700">Datas Importantes</h2>
+              <section className="p-5 sm:p-6 bg-[#E6E3DC] rounded-lg shadow">
+                <h2 className="text-xl font-semibold mb-5 text-gray-900">Datas Importantes</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
                   <div>
-                      <label htmlFor="dataInicio" className="block text-sm font-medium text-gray-700">Início da Atividade</label>
-                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"/><input id="dataInicio" name="dataInicio" type="date" value={formData.dataInicio} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/></div>
+                      <label htmlFor="dataInicio" className="block text-sm font-medium text-gray-900">Início da Atividade</label>
+                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataInicio" name="dataInicio" type="date" value={formData.dataInicio} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/></div>
                   </div>
                   <div>
-                      <label htmlFor="dataFim" className="block text-sm font-medium text-gray-700">Fim da Atividade</label>
-                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"/><input id="dataFim" name="dataFim" type="date" value={formData.dataFim} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/></div>
+                      <label htmlFor="dataFim" className="block text-sm font-medium text-gray-900">Fim da Atividade</label>
+                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataFim" name="dataFim" type="date" value={formData.dataFim} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/></div>
                   </div>
                   <div>
-                      <label htmlFor="dataInscInicio" className="block text-sm font-medium text-gray-700">Início das Inscrições</label>
-                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"/><input id="dataInscInicio" name="dataInscInicio" type="date" value={formData.dataInscInicio} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/></div>
+                      <label htmlFor="dataInscInicio" className="block text-sm font-medium text-gray-900">Início das Inscrições</label>
+                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataInscInicio" name="dataInscInicio" type="date" value={formData.dataInscInicio} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/></div>
                   </div>
                   <div>
-                      <label htmlFor="dataInscFim" className="block text-sm font-medium text-gray-700">Fim das Inscrições</label>
-                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"/><input id="dataInscFim" name="dataInscFim" type="date" value={formData.dataInscFim} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"/></div>
+                      <label htmlFor="dataInscFim" className="block text-sm font-medium text-gray-900">Fim das Inscrições</label>
+                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataInscFim" name="dataInscFim" type="date" value={formData.dataInscFim} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/></div>
                   </div>
                 </div>
               </section>
             </main>
           </form>
         </div>
-        <footer className="flex-shrink-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] p-4 sticky bottom-0 z-10 border-t border-gray-200">
+        <footer className="flex-shrink-0 bg-[#E6E3DC] shadow-[0_-2px_10px_rgba(0,0,0,0.05)] p-4 sticky bottom-0 z-10 border-t border-gray-300">
           <div className="max-w-4xl mx-auto flex flex-col-reverse sm:flex-row justify-between items-center gap-3">
             <div className="h-6 min-w-[250px] flex-shrink-0"> 
               {feedback.message && ( 
-                  <div className={`flex items-center gap-1.5 text-xs sm:text-sm ${feedback.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className={`flex items-center gap-1.5 text-xs sm:text-sm ${feedback.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
                       {feedback.type === 'success' ? <FiCheckCircle /> : <FiXCircle />}
                       <span>{feedback.message}</span>
                   </div>
               )}
             </div>
             <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
-              <button type="button" onClick={() => navigate(-1)} disabled={isSubmitting} className="w-full sm:w-auto px-5 py-2 bg-gray-200 text-gray-700 font-medium rounded-md transition-colors hover:bg-gray-300 disabled:opacity-60 text-sm"> 
+              <button type="button" onClick={() => navigate(-1)} disabled={isSubmitting} className="w-full sm:w-auto px-5 py-2 bg-[#E6E3DC] text-gray-900 font-medium rounded-md transition-colors hover:bg-[#e0dbcf] disabled:opacity-60 text-sm"> 
                 Cancelar
               </button>
               <button type="submit" form="edit-curso-form" disabled={isSubmitting || !formData || loading || optionsLoading} 
-                className="w-full sm:w-auto min-w-[150px] px-5 py-2 flex items-center justify-center bg-green-600 text-white font-semibold rounded-md transition-colors hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed text-sm">
+                className="w-full sm:w-auto min-w-[150px] px-5 py-2 flex items-center justify-center bg-green-700 text-white font-semibold rounded-md transition-colors hover:bg-green-800 disabled:bg-green-300 disabled:cursor-not-allowed text-sm">
                 {isSubmitting ? <FiLoader className="animate-spin text-lg" /> : 'Salvar Alterações'} 
               </button>
             </div>
