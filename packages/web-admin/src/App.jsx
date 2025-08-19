@@ -1,3 +1,5 @@
+// Caminho: seu-projeto-frontend/src/App.js
+
 import React from "react";
 import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 
@@ -9,14 +11,18 @@ import RedirectIfAuth from "./components/RedirectIfAuth";
 // --- PÁGINAS GERAIS E DE AUTENTICAÇÃO ---
 import Home from "./modules/Home/Home";
 import TelaDeLoginAdmin from "./modules/auth/TelaDeLoginAdmin";
-// ATUALIZADO: Importando os novos componentes de recuperação de senha
 import TelaSolicitarRecuperacao from "./modules/auth/TelaSolicitarRecuperacao";
 import TelaRedefinirSenha from "./modules/auth/TelaRedefinirSenha";
 
-// ... (seus outros imports de páginas) ...
+// --- PÁGINAS DA APLICAÇÃO ---
 import TelaDeSolicitacaoHortas from "./modules/Solicitacoes/hortas/TelaDeSolicitacaoHortas";
 import TelaDeDescricaoDeSolicitacaoHortas from "./modules/Solicitacoes/hortas/TelaDeDescricaoDeSolicitacaoHortas";
 import TelaEdicaoHorta from "./modules/Solicitacoes/hortas/TelaEdicaoHorta";
+// ======================= INÍCIO DA CORREÇÃO =======================
+// 1. IMPORTA O NOVO COMPONENTE DE EDIÇÃO DE USUÁRIO
+// (Ajuste o caminho se você salvou o arquivo em uma pasta diferente)
+import TelaEdicaoUsuario from "./modules/usuarios/TelaEdicaoUsuario";
+// ======================== FIM DA CORREÇÃO =========================
 import TelaHortasAtivas from "./modules/Solicitacoes/hortas/TelaHortasAtivas";
 import TelaDeCadastroDeCurso from "./modules/Solicitacoes/cursos/TelaDeCadastroDeCurso";
 import TelaDeCursosAtivos from "./modules/Solicitacoes/cursos/TelaDeCursosAtivos";
@@ -43,29 +49,28 @@ function ProtectedLayout() {
 export default function App() {
   return (
     <Routes>
-      {/* ========================================================== */}
-      {/* ROTAS PÚBLICAS                                             */}
-      {/* ========================================================== */}
+      {/* ROTAS PÚBLICAS */}
       <Route element={<RedirectIfAuth />}>
         <Route path="/" element={<TelaDeLoginAdmin />} />
-        {/* ATUALIZADO: A rota antiga agora aponta para a tela de solicitação */}
         <Route path="/recuperar-senha" element={<TelaSolicitarRecuperacao />} />
-        {/* NOVO: Rota para a tela de redefinição, que aceita um token como parâmetro */}
         <Route path="/redefinir-senha/:token" element={<TelaRedefinirSenha />} />
       </Route>
 
-      {/* ========================================================== */}
-      {/* ROTAS PROTEGIDAS                                           */}
-      {/* ========================================================== */}
+      {/* ROTAS PROTEGIDAS */}
       <Route element={<PrivateRoute />}>
         <Route path="/app" element={<ProtectedLayout />}>
           <Route index element={<Navigate to="home" replace />} />
           <Route path="home" element={<Home />} />
-          {/* ... (suas outras rotas protegidas permanecem as mesmas) ... */}
           <Route path="tela-de-solicitacao-hortas" element={<TelaDeSolicitacaoHortas />} />
           <Route path="tela-de-descricao-de-solicitacao-hortas/:id" element={<TelaDeDescricaoDeSolicitacaoHortas />} />
           <Route path="tela-hortas-ativas" element={<TelaHortasAtivas />} />
           <Route path="hortas-editar/:id" element={<TelaEdicaoHorta />} />
+          
+          {/* ======================= INÍCIO DA CORREÇÃO ======================= */}
+          {/* 2. ADICIONA A NOVA ROTA PARA A EDIÇÃO DE USUÁRIO */}
+          <Route path="usuarios-editar/:id" element={<TelaEdicaoUsuario />} />
+          {/* ======================== FIM DA CORREÇÃO ========================= */}
+
           <Route path="tela-de-cadastro-de-curso" element={<TelaDeCadastroDeCurso />} />
           <Route path="tela-de-cursos-ativos" element={<TelaDeCursosAtivos />} />
           <Route path="tela-de-edicao-de-cursos/:id" element={<TelaDeEdicaoDeCursos />} />
@@ -80,7 +85,7 @@ export default function App() {
         </Route>
       </Route>
 
-      {/* Redireciona qualquer outra rota inválida para a raiz (login) */}
+      {/* Redireciona qualquer outra rota inválida */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

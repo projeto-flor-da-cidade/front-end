@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react'; // Removido useRef
+// Caminho: src/pages/App/TelaDeEdicaoDeCursos/TelaDeEdicaoDeCursos.jsx
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api, { BACKEND_URL } from '../../../services/api'; 
-// import Header from '../../Home/components/Header'; 
+import api, { BACKEND_URL } from '../../../services/api';
 import { FiUpload, FiCheckCircle, FiXCircle, FiCalendar, FiLoader, FiAlertCircle, FiImage } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,16 +10,13 @@ const formatDateForInput = (dateString) => {
   if (!dateString) return '';
   try {
     const date = new Date(dateString);
-    date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
-    return date.toISOString().split('T')[0];
+    const offset = date.getTimezoneOffset();
+    const adjustedDate = new Date(date.getTime() - (offset * 60 * 1000));
+    return adjustedDate.toISOString().split('T')[0];
   } catch (e) {
-    console.warn("Erro ao formatar data para input:", dateString, e);
     return '';
   }
 };
-
-const PLACEHOLDER_FILENAME_FROM_BACKEND = "folhin.png";
-const IMAGE_UPLOAD_PATH_SEGMENT = "banners"; 
 
 export default function TelaDeEdicaoDeCursos() {
   const { id } = useParams();
@@ -30,7 +27,7 @@ export default function TelaDeEdicaoDeCursos() {
   const [bannerFile, setBannerFile] = useState(null);
   const [bannerPreview, setBannerPreview] = useState(null);
   
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
@@ -42,26 +39,25 @@ export default function TelaDeEdicaoDeCursos() {
     turnos: []
   });
 
-  const SERVER_PLACEHOLDER_URL = `${BACKEND_URL}/uploads/${IMAGE_UPLOAD_PATH_SEGMENT}/${PLACEHOLDER_FILENAME_FROM_BACKEND}`;
+  const SERVER_PLACEHOLDER_URL = `${BACKEND_URL}/api/arquivos/banners/folhin.png`;
 
   useEffect(() => {
     const fetchData = async () => {
       if (!id) {
-        console.warn("ID do curso não encontrado, redirecionando.");
-        navigate('/app/home'); 
+        navigate('/app/home');
         return;
       }
       try {
-        setLoading(true); 
-        setOptionsLoading(true); 
+        setLoading(true);
+        setOptionsLoading(true);
         const [cursoResponse, optionsResponse] = await Promise.all([
           api.get(`/cursos/${id}`),
-          api.get('/cursos/opcoes') 
+          api.get('/cursos/opcoes')
         ]);
 
         const data = cursoResponse.data;
         if (!data) {
-            throw new Error("Dados do curso não encontrados na resposta da API.");
+          throw new Error("Dados do curso não encontrados na resposta da API.");
         }
         setOriginalCurso(data);
         setFormData({
@@ -81,20 +77,23 @@ export default function TelaDeEdicaoDeCursos() {
           ativo: data.ativo ?? true,
         });
         
-        if (data.fotoBanner && data.fotoBanner !== PLACEHOLDER_FILENAME_FROM_BACKEND) {
-          setBannerPreview(`${BACKEND_URL}/uploads/${IMAGE_UPLOAD_PATH_SEGMENT}/${data.fotoBanner}`);
+        // ======================= INÍCIO DA CORREÇÃO =======================
+        // Usa a propriedade correta 'fotoBannerUrl' que vem do DTO da API.
+        if (data.fotoBannerUrl && !data.fotoBannerUrl.endsWith('folhin.png')) {
+          setBannerPreview(`${BACKEND_URL}${data.fotoBannerUrl.replace('/api', '')}`);
         } else {
-          setBannerPreview(SERVER_PLACEHOLDER_URL); 
+          setBannerPreview(SERVER_PLACEHOLDER_URL);
         }
+        // ======================== FIM DA CORREÇÃO =========================
         
-        setFormOptions(optionsResponse.data); 
+        setFormOptions(optionsResponse.data);
         setError(null);
       } catch (err) {
         setError('Não foi possível carregar os dados do curso para edição.');
         console.error("Erro ao buscar dados do curso:", err);
       } finally {
-        setLoading(false); 
-        setOptionsLoading(false); 
+        setLoading(false);
+        setOptionsLoading(false);
       }
     };
     fetchData();
@@ -107,17 +106,17 @@ export default function TelaDeEdicaoDeCursos() {
       if (prev === null) return null;
       return { ...prev, [name]: finalValue };
     });
-  }, []); 
+  }, []);
 
   const handleBannerChange = useCallback((e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) { 
+      if (file.size > 2 * 1024 * 1024) { // 2MB
         toast.error("O arquivo do banner não pode exceder 2MB.");
         return;
       }
-      setBannerFile(file); 
-      setBannerPreview(URL.createObjectURL(file)); 
+      setBannerFile(file);
+      setBannerPreview(URL.createObjectURL(file));
     }
   }, []);
 
@@ -125,11 +124,11 @@ export default function TelaDeEdicaoDeCursos() {
     e.preventDefault();
     if (!formData) {
         toast.error('Erro: Dados do formulário não estão prontos.');
-        setFeedback({ type: 'error', message: 'Dados do formulário não carregados.' }); 
+        setFeedback({ type: 'error', message: 'Dados do formulário não carregados.' });
         return;
     }
-    setIsSubmitting(true); 
-    setFeedback({ type: '', message: '' }); 
+    setIsSubmitting(true);
+    setFeedback({ type: '', message: '' });
 
     const cursoJsonData = {
       nome: formData.nome,
@@ -149,39 +148,42 @@ export default function TelaDeEdicaoDeCursos() {
     };
     
     const submissionPayload = new FormData();
-    submissionPayload.append('curso', new Blob([JSON.stringify(cursoJsonData)], { type: 'application/json' })); 
+    submissionPayload.append('curso', new Blob([JSON.stringify(cursoJsonData)], { type: 'application/json' }));
     
-    if (bannerFile) { 
-      submissionPayload.append('banner', bannerFile); 
+    if (bannerFile) {
+      submissionPayload.append('banner', bannerFile);
     }
 
     try {
       const response = await api.put(`/cursos/${id}`, submissionPayload);
 
       toast.success('Atividade atualizada com sucesso!');
-      setFeedback({ type: 'success', message: 'Atividade atualizada com sucesso!' }); 
+      setFeedback({ type: 'success', message: 'Atividade atualizada com sucesso!' });
 
-      if (response.data && response.data.fotoBanner) {
-        setBannerPreview(`${BACKEND_URL}/uploads/${IMAGE_UPLOAD_PATH_SEGMENT}/${response.data.fotoBanner}`);
+      // ======================= INÍCIO DA CORREÇÃO =======================
+      // Usa a propriedade correta 'fotoBannerUrl' da resposta da API após salvar.
+      if (response.data && response.data.fotoBannerUrl && !response.data.fotoBannerUrl.endsWith('folhin.png')) {
+        setBannerPreview(`${BACKEND_URL}${response.data.fotoBannerUrl.replace('/api', '')}`);
       } else {
         setBannerPreview(SERVER_PLACEHOLDER_URL);
       }
-      setBannerFile(null); 
-      setOriginalCurso(response.data); 
+      // ======================== FIM DA CORREÇÃO =========================
+      
+      setBannerFile(null);
+      setOriginalCurso(response.data);
       
       setTimeout(() => navigate('/app/tela-de-cursos-ativos'), 1500);
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.response?.data || 'Falha ao atualizar a atividade. Verifique os campos e tente novamente.';
       toast.error(errorMessage);
-      setFeedback({ type: 'error', message: errorMessage }); 
+      setFeedback({ type: 'error', message: errorMessage });
       console.error("Erro ao atualizar curso:", err.response || err);
     } finally {
-      setIsSubmitting(false); 
+      setIsSubmitting(false);
     }
   }, [id, navigate, formData, bannerFile, SERVER_PLACEHOLDER_URL]);
 
-  // JSX para loading e error states (sem alterações na lógica, apenas visuais)
-  if (loading || !formData) { 
+  if (loading || !formData) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center p-4 bg-[#A9AD99]">
         <FiLoader className="animate-spin text-5xl text-gray-700" />
@@ -190,7 +192,7 @@ export default function TelaDeEdicaoDeCursos() {
     );
   }
 
-  if (error) { 
+  if (error) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center p-4 text-center bg-[#A9AD99]">
         <div className="bg-[#E6E3DC] p-6 rounded-lg shadow-lg max-w-md">
@@ -216,10 +218,8 @@ export default function TelaDeEdicaoDeCursos() {
     );
   }
   
-  // JSX do return principal do formulário (visuais atualizados)
   return (
     <div className="flex flex-col min-h-screen bg-[#A9AD99]">
-      {/* <Header title="Edição de Curso" /> */}
       <ToastContainer position="top-right" autoClose={3500} theme="colored" hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       
       <div className="flex-grow flex flex-col">
@@ -238,30 +238,30 @@ export default function TelaDeEdicaoDeCursos() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                     <div>
                         <label className="block text-sm font-medium text-gray-900 mb-1">Tipo de Atividade</label>
-                        <div className="flex space-x-3 p-1.5 bg-[#E6E3DC] rounded-md">
-                        {optionsLoading ? <p className="text-sm text-gray-800 p-2">Carregando tipos...</p> : formOptions.tiposAtividade.length > 0 ? formOptions.tiposAtividade.map((type) => ( 
-                            <label key={type} className={`flex-1 text-center py-2 px-3 rounded-md cursor-pointer transition-colors text-xs sm:text-sm ${formData.tipoAtividade === type ? 'bg-green-700 text-white shadow-md' : 'hover:bg-[#e0dbcf] text-gray-900'}`}>
-                            <input type="radio" name="tipoAtividade" value={type} checked={formData.tipoAtividade === type} onChange={handleChange} className="sr-only"/> 
-                            {type}
-                            </label>
-                        )) : <p className="text-sm text-gray-800 p-2">Nenhum tipo disponível.</p>}
+                        <div className="flex space-x-3 p-1.5 bg-white rounded-md">
+                          {optionsLoading ? <p className="text-sm text-gray-800 p-2">Carregando tipos...</p> : formOptions.tiposAtividade.length > 0 ? formOptions.tiposAtividade.map((type) => ( 
+                              <label key={type} className={`flex-1 text-center py-2 px-3 rounded-md cursor-pointer transition-colors text-xs sm:text-sm ${formData.tipoAtividade === type ? 'bg-green-700 text-white shadow-md' : 'hover:bg-gray-100 text-gray-900'}`}>
+                              <input type="radio" name="tipoAtividade" value={type} checked={formData.tipoAtividade === type} onChange={handleChange} className="sr-only"/> 
+                              {type}
+                              </label>
+                          )) : <p className="text-sm text-gray-800 p-2">Nenhum tipo disponível.</p>}
                         </div>
                     </div>
                     <div className="md:col-span-2">
                         <label htmlFor="nome" className="block text-sm font-medium text-gray-900">Nome da Atividade</label>
-                        <input id="nome" name="nome" type="text" value={formData.nome} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/>
+                        <input id="nome" name="nome" type="text" value={formData.nome} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900"/>
                     </div>
                     <div className="md:col-span-2">
                         <label htmlFor="descricao" className="block text-sm font-medium text-gray-900">Descrição</label>
-                        <textarea id="descricao" name="descricao" value={formData.descricao} onChange={handleChange} required rows="4" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/>
+                        <textarea id="descricao" name="descricao" value={formData.descricao} onChange={handleChange} required rows="4" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900"/>
                     </div>
                     <div>
                         <label htmlFor="local" className="block text-sm font-medium text-gray-900">Local</label>
-                        <input id="local" name="local" type="text" value={formData.local} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/>
+                        <input id="local" name="local" type="text" value={formData.local} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900"/>
                     </div>
                     <div>
                         <label htmlFor="instituicao" className="block text-sm font-medium text-gray-900">Instituição</label>
-                        <input id="instituicao" name="instituicao" type="text" value={formData.instituicao} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/>
+                        <input id="instituicao" name="instituicao" type="text" value={formData.instituicao} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900"/>
                     </div>
                 </div>
               </section>
@@ -271,20 +271,13 @@ export default function TelaDeEdicaoDeCursos() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-5 items-start">
                   <div className="space-y-3">
                     <label className="block text-sm font-medium text-gray-900">Banner da Atividade</label>
-                    <div className="w-full h-48 bg-[#E6E3DC] border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center overflow-hidden relative group">
+                    <div className="w-full h-48 bg-gray-50 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center overflow-hidden relative group">
                       {bannerPreview ? (
                         <img 
                           src={bannerPreview} 
                           alt="Preview do banner" 
                           className="object-contain w-full h-full" 
-                          onError={(e) => {
-                            if (e.target.src !== SERVER_PLACEHOLDER_URL) {
-                              e.target.src = SERVER_PLACEHOLDER_URL;
-                            } else {
-                               e.target.onerror = null; 
-                               e.target.alt = "Falha ao carregar imagem placeholder";
-                            }
-                          }} 
+                          onError={(e) => { e.target.src = SERVER_PLACEHOLDER_URL; }} 
                         />
                       ) : (
                         <div className="flex flex-col items-center text-gray-700 p-4 text-center">
@@ -302,29 +295,29 @@ export default function TelaDeEdicaoDeCursos() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
                       <label htmlFor="publicoAlvo" className="block text-sm font-medium text-gray-900">Público Alvo</label>
-                      <select id="publicoAlvo" name="publicoAlvo" value={formData.publicoAlvo} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm disabled:bg-[#E6E3DC] bg-[#E6E3DC] text-gray-900"> 
+                      <select id="publicoAlvo" name="publicoAlvo" value={formData.publicoAlvo} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900"> 
                         <option value="">{optionsLoading ? "Carregando..." : "Selecione"}</option>
                         {formOptions.publicosAlvo.map(p => <option key={p} value={p}>{p.replace(/_/g, ' ')}</option>)} 
                       </select>
                     </div>
                     <div>
                       <label htmlFor="turno" className="block text-sm font-medium text-gray-900">Turno</label>
-                      <select id="turno" name="turno" value={formData.turno} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm disabled:bg-[#E6E3DC] bg-[#E6E3DC] text-gray-900"> 
+                      <select id="turno" name="turno" value={formData.turno} onChange={handleChange} required disabled={optionsLoading} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900"> 
                         <option value="">{optionsLoading ? "Carregando..." : "Selecione"}</option>
                         {formOptions.turnos.map(t => <option key={t} value={t}>{t}</option>)} 
                       </select>
                     </div>
                     <div>
                       <label htmlFor="maxPessoas" className="block text-sm font-medium text-gray-900">Nº de Vagas</label>
-                      <input id="maxPessoas" name="maxPessoas" type="number" min="0" value={formData.maxPessoas} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900" />
+                      <input id="maxPessoas" name="maxPessoas" type="number" min="0" value={formData.maxPessoas} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900" />
                     </div>
                     <div>
                       <label htmlFor="cargaHoraria" className="block text-sm font-medium text-gray-900">Carga Horária (h)</label>
-                      <input id="cargaHoraria" name="cargaHoraria" type="number" min="0" value={formData.cargaHoraria} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900" />
+                      <input id="cargaHoraria" name="cargaHoraria" type="number" min="0" value={formData.cargaHoraria} onChange={handleChange} required className="mt-1 block w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900" />
                     </div>
                     <div className="sm:col-span-2">
                       <label htmlFor="ativo" className="block text-sm font-medium text-gray-900">Status da Atividade</label>
-                      <select id="ativo" name="ativo" value={formData.ativo.toString()} onChange={handleChange} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"> 
+                      <select id="ativo" name="ativo" value={formData.ativo.toString()} onChange={handleChange} className="mt-1 block w-full h-10 pl-3 pr-10 py-0 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900"> 
                         <option value="true">Ativo</option>
                         <option value="false">Inativo</option>
                       </select>
@@ -338,19 +331,19 @@ export default function TelaDeEdicaoDeCursos() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
                   <div>
                       <label htmlFor="dataInicio" className="block text-sm font-medium text-gray-900">Início da Atividade</label>
-                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataInicio" name="dataInicio" type="date" value={formData.dataInicio} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/></div>
+                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataInicio" name="dataInicio" type="date" value={formData.dataInicio} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900"/></div>
                   </div>
                   <div>
                       <label htmlFor="dataFim" className="block text-sm font-medium text-gray-900">Fim da Atividade</label>
-                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataFim" name="dataFim" type="date" value={formData.dataFim} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/></div>
+                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataFim" name="dataFim" type="date" value={formData.dataFim} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900"/></div>
                   </div>
                   <div>
                       <label htmlFor="dataInscInicio" className="block text-sm font-medium text-gray-900">Início das Inscrições</label>
-                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataInscInicio" name="dataInscInicio" type="date" value={formData.dataInscInicio} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/></div>
+                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataInscInicio" name="dataInscInicio" type="date" value={formData.dataInscInicio} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900"/></div>
                   </div>
                   <div>
                       <label htmlFor="dataInscFim" className="block text-sm font-medium text-gray-900">Fim das Inscrições</label>
-                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataInscFim" name="dataInscFim" type="date" value={formData.dataInscFim} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-[#E6E3DC] text-gray-900"/></div>
+                      <div className="relative mt-1"><FiCalendar className="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-gray-700 pointer-events-none"/><input id="dataInscFim" name="dataInscFim" type="date" value={formData.dataInscFim} onChange={handleChange} required className="w-full h-10 pl-9 pr-3 border border-gray-300 rounded-md shadow-sm focus:ring-green-600 focus:border-green-600 sm:text-sm bg-white text-gray-900"/></div>
                   </div>
                 </div>
               </section>
@@ -368,7 +361,7 @@ export default function TelaDeEdicaoDeCursos() {
               )}
             </div>
             <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
-              <button type="button" onClick={() => navigate(-1)} disabled={isSubmitting} className="w-full sm:w-auto px-5 py-2 bg-[#E6E3DC] text-gray-900 font-medium rounded-md transition-colors hover:bg-[#e0dbcf] disabled:opacity-60 text-sm"> 
+              <button type="button" onClick={() => navigate(-1)} disabled={isSubmitting} className="w-full sm:w-auto px-5 py-2 bg-gray-200 text-gray-800 font-medium rounded-md transition-colors hover:bg-gray-300 disabled:opacity-60 text-sm"> 
                 Cancelar
               </button>
               <button type="submit" form="edit-curso-form" disabled={isSubmitting || !formData || loading || optionsLoading} 

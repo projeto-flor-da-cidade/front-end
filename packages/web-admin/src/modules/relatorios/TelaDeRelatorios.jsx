@@ -40,20 +40,20 @@ const RelatorioCard = ({ item }) => {
   const iconColor = item.isCurso ? "text-indigo-600" : (item.tipo === "Horta" ? "text-green-700" : "text-blue-600");
 
   return (
-    <div className="flex flex-col justify-between bg-[#E6E3DC] p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
+    <div className="flex flex-col justify-between bg-white p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
       <div>
         <div className="flex items-center mb-2">
           <IconComponent className={`w-5 h-5 mr-2.5 ${iconColor}`} />
-          <p className="font-semibold text-gray-900 break-words leading-tight text-base" title={item.nome}>{item.nome}</p>
+          <p className="font-semibold text-gray-800 break-words leading-tight text-base" title={item.nome}>{item.nome}</p>
         </div>
-        <p className="text-gray-700 text-xs mb-1">{item.tipo} – {formatDate(item.data)}</p>
-        <div className="text-gray-800 text-sm mt-2 flex items-center gap-1.5">
+        <p className="text-gray-600 text-xs mb-1">{item.tipo} – {formatDate(item.data)}</p>
+        <div className="text-gray-700 text-sm mt-2 flex items-center gap-1.5">
           <span className="text-xs font-medium">Status:</span>
           <StatusBadge status={item.status} />
         </div>
       </div>
-      <div className="mt-4 pt-3 border-t border-gray-300 flex justify-end">
-        <button onClick={handleNavigation} className="p-2 text-gray-700 hover:text-blue-700 hover:bg-[#dfe0d3] rounded-full transition-colors">
+      <div className="mt-4 pt-3 border-t border-gray-200 flex justify-end">
+        <button onClick={handleNavigation} className="p-2 text-gray-600 hover:text-blue-700 hover:bg-gray-100 rounded-full transition-colors">
           <FaEdit className="w-4 h-4" />
         </button>
       </div>
@@ -140,12 +140,18 @@ export default function TelaDeRelatorios() {
 
   const handleDownloadCursos = useCallback(() => {
     const date = new Date().toISOString().slice(0, 10);
-    handleDownload('/cursos/relatorios/download', `relatorio-cursos-ativos-${date}.xlsx`, setIsDownloadingCursos);
+    // ======================= INÍCIO DA CORREÇÃO =======================
+    // Remove o segmento "/relatorios" do caminho da URL
+    handleDownload('/cursos/download/excel', `relatorio-cursos-ativos-${date}.xlsx`, setIsDownloadingCursos);
+    // ======================== FIM DA CORREÇÃO =========================
   }, [handleDownload]);
 
   const handleDownloadTodasHortas = useCallback(() => {
     const date = new Date().toISOString().slice(0, 10);
-    handleDownload('/hortas/relatorios/download', `relatorio-todas-hortas-${date}.xlsx`, setIsDownloadingHortas);
+    // ======================= INÍCIO DA CORREÇÃO =======================
+    // Remove o segmento "/relatorios" do caminho da URL
+    handleDownload('/hortas/download/excel', `relatorio-todas-hortas-${date}.xlsx`, setIsDownloadingHortas);
+    // ======================== FIM DA CORREÇÃO =========================
   }, [handleDownload]);
 
   return (
@@ -153,21 +159,21 @@ export default function TelaDeRelatorios() {
       <ToastContainer position="top-center" autoClose={4000} theme="colored" />
       <div className="max-w-7xl mx-auto bg-[#E6E3DC] rounded-xl shadow-lg p-6">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Consultas e Relatórios</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Consultas e Relatórios</h1>
           <div className="relative" ref={optionsMenuRef}>
             <button onClick={() => setShowOptions(o => !o)} className="bg-green-700 hover:bg-green-800 text-white p-2.5 rounded-full transition shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600" aria-label="Ações"><FaPlus className="w-5 h-5" /></button>
-            <div className={`absolute right-0 mt-2 w-72 bg-[#E6E3DC] rounded-lg shadow-2xl z-20 p-2 space-y-1 transition-all duration-200 ease-out origin-top-right ${showOptions ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
-              <button onClick={() => navigate("/app/criar-modelo-relatorio")} className="block w-full text-left px-4 py-2.5 text-sm text-gray-900 rounded hover:bg-[#e0dbcf]">Criar modelo de relatório</button>
-              <div className="border-t border-gray-300 my-1"></div>
-              <button onClick={() => navigate("/app/criar-relatorio-acolhimento")} className="block w-full text-left px-4 py-2.5 text-sm text-gray-900 rounded hover:bg-[#e0dbcf]">Criar relatório de acolhimento</button>
-              <div className="border-t border-gray-300 my-1"></div>
-              <button onClick={() => navigate("/app/criar-relatorio-acompanhamento")} className="block w-full text-left px-4 py-2.5 text-sm text-gray-900 rounded hover:bg-[#e0dbcf]">Criar relatório de acompanhamento</button>
-              <div className="border-t border-gray-300 my-1"></div>
-              <button onClick={handleDownloadCursos} disabled={isDownloadingCursos} className="flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm text-gray-900 rounded hover:bg-[#e0dbcf] disabled:opacity-50 disabled:cursor-wait">
+            <div className={`absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-2xl z-20 p-2 space-y-1 transition-all duration-200 ease-out origin-top-right ${showOptions ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+              <button onClick={() => navigate("/app/criar-modelo-relatorio")} className="block w-full text-left px-4 py-2.5 text-sm text-gray-800 rounded hover:bg-gray-100">Criar modelo de relatório</button>
+              <div className="border-t border-gray-200 my-1"></div>
+              <button onClick={() => navigate("/app/criar-relatorio-acolhimento")} className="block w-full text-left px-4 py-2.5 text-sm text-gray-800 rounded hover:bg-gray-100">Criar relatório de acolhimento</button>
+              <div className="border-t border-gray-200 my-1"></div>
+              <button onClick={() => navigate("/app/criar-relatorio-acompanhamento")} className="block w-full text-left px-4 py-2.5 text-sm text-gray-800 rounded hover:bg-gray-100">Criar relatório de acompanhamento</button>
+              <div className="border-t border-gray-200 my-1"></div>
+              <button onClick={handleDownloadCursos} disabled={isDownloadingCursos} className="flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm text-gray-800 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-wait">
                 {isDownloadingCursos ? <FaSpinner className="animate-spin text-blue-600" /> : <FaDownload className="text-green-700" />}
                 <span>{isDownloadingCursos ? 'Gerando...' : 'Cursos Ativos (.xlsx)'}</span>
               </button>
-              <button onClick={handleDownloadTodasHortas} disabled={isDownloadingHortas} className="flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm text-gray-900 rounded hover:bg-[#e0dbcf] disabled:opacity-50 disabled:cursor-wait">
+              <button onClick={handleDownloadTodasHortas} disabled={isDownloadingHortas} className="flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm text-gray-800 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-wait">
                 {isDownloadingHortas ? <FaSpinner className="animate-spin text-blue-600" /> : <FaDownload className="text-green-700" />}
                 <span>{isDownloadingHortas ? 'Gerando...' : 'Todas as Hortas (.xlsx)'}</span>
               </button>
@@ -177,23 +183,23 @@ export default function TelaDeRelatorios() {
 
         <section className="mb-6 space-y-4">
           <div className="relative w-full md:max-w-md">
-            <FaSearch className="w-4 h-4 text-gray-700 absolute top-1/2 left-3.5 -translate-y-1/2 pointer-events-none"/>
+            <FaSearch className="w-4 h-4 text-gray-600 absolute top-1/2 left-3.5 -translate-y-1/2 pointer-events-none"/>
             <input
               type="text"
               placeholder="Buscar por nome..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full h-10 pl-10 pr-4 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 shadow-sm bg-[#E6E3DC] text-gray-900"
+              className="w-full h-10 pl-10 pr-4 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 shadow-sm bg-white text-gray-800"
             />
           </div>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-x-6 gap-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-semibold text-gray-900 text-sm shrink-0">Filtrar por:</span>
+              <span className="font-semibold text-gray-800 text-sm shrink-0">Filtrar por:</span>
               {FILTER_TYPES.map(type => (
                 <button
                   key={type}
                   onClick={() => setActiveFilter(type)}
-                  className={`px-3.5 py-1.5 text-sm rounded-full transition-colors duration-200 border ${activeFilter === type ? 'bg-green-700 text-white font-semibold shadow-md border-green-800' : 'bg-[#E6E3DC] text-gray-900 hover:bg-[#e0dbcf] border-gray-300 hover:border-gray-400'}`}
+                  className={`px-3.5 py-1.5 text-sm rounded-full transition-colors duration-200 border ${activeFilter === type ? 'bg-green-700 text-white font-semibold shadow-md border-green-800' : 'bg-white text-gray-800 hover:bg-gray-50 border-gray-300 hover:border-gray-400'}`}
                 >
                   {type}
                 </button>
@@ -201,12 +207,12 @@ export default function TelaDeRelatorios() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-semibold text-gray-900 text-sm shrink-0">Ordenar por:</span>
+              <span className="font-semibold text-gray-800 text-sm shrink-0">Ordenar por:</span>
               {SORT_OPTIONS.map(opt => (
                 <button
                   key={opt.key}
                   onClick={() => setSortKey(opt.key)}
-                  className={`px-3.5 py-1.5 text-sm rounded-full transition-colors duration-200 border ${sortKey === opt.key ? 'bg-gray-800 text-white font-semibold shadow-md border-gray-900' : 'bg-[#E6E3DC] text-gray-900 hover:bg-[#e0dbcf] border-gray-300 hover:border-gray-400'}`}
+                  className={`px-3.5 py-1.5 text-sm rounded-full transition-colors duration-200 border ${sortKey === opt.key ? 'bg-gray-700 text-white font-semibold shadow-md border-gray-800' : 'bg-white text-gray-800 hover:bg-gray-50 border-gray-300 hover:border-gray-400'}`}
                 >
                   {opt.label}
                 </button>
@@ -216,9 +222,9 @@ export default function TelaDeRelatorios() {
         </section>
 
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {loading && <div className="col-span-full flex justify-center items-center p-10"><FaSpinner className="animate-spin text-5xl text-green-700" /><p className="ml-4 text-lg text-gray-900">Carregando dados...</p></div>}
+          {loading && <div className="col-span-full flex justify-center items-center p-10"><FaSpinner className="animate-spin text-5xl text-green-700" /><p className="ml-4 text-lg text-gray-800">Carregando dados...</p></div>}
           {error && !loading && <p className="col-span-full text-center text-red-700 bg-red-50 p-8 rounded-lg border border-red-200">{error}</p>}
-          {!loading && !error && sortedData.length === 0 && <p className="col-span-full text-center text-gray-700 p-10 text-lg">Nenhum item encontrado com os filtros aplicados.</p>}
+          {!loading && !error && sortedData.length === 0 && <p className="col-span-full text-center text-gray-600 p-10 text-lg">Nenhum item encontrado com os filtros aplicados.</p>}
           {!loading && !error && sortedData.map((item) => <RelatorioCard key={`${item.tipo}-${item.id}`} item={item} />)}
         </section>
       </div>

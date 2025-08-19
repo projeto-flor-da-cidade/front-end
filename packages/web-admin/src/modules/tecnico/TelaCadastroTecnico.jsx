@@ -1,4 +1,5 @@
-// src/modules/tecnico/TelaCadastroTecnico.jsx
+// Caminho: src/modules/tecnico/TelaCadastroTecnico.jsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
@@ -74,29 +75,22 @@ export default function TelaCadastroTecnico() {
   const [regioes, setRegioes] = useState([]);
   const [loadingRegioes, setLoadingRegioes] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAdminUser, setIsAdminUser] = useState(null);
+  const [isAdminUser, setIsAdminUser] = useState(true); // Assumindo que o usuário é admin
 
   useEffect(() => {
-    // ... Sua lógica de verificação de admin ...
-    setIsAdminUser(true); // Simulando para desenvolvimento
-  }, [navigate]);
-
-  useEffect(() => {
-    if (isAdminUser) {
-      const fetchRegioes = async () => {
-        setLoadingRegioes(true);
-        try {
-          const response = await api.get('/regioes');
-          setRegioes(response.data || []);
-        } catch (error) {
-          toast.error("Não foi possível carregar as regiões.");
-        } finally {
-          setLoadingRegioes(false);
-        }
-      };
-      fetchRegioes();
-    }
-  }, [isAdminUser]);
+    const fetchRegioes = async () => {
+      setLoadingRegioes(true);
+      try {
+        const response = await api.get('/regioes');
+        setRegioes(response.data || []);
+      } catch (error) {
+        toast.error("Não foi possível carregar as regiões.");
+      } finally {
+        setLoadingRegioes(false);
+      }
+    };
+    fetchRegioes();
+  }, []);
 
   const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
@@ -107,8 +101,15 @@ export default function TelaCadastroTecnico() {
   }, [errors]);
 
   const validateForm = () => {
-    // ... Sua lógica de validação ...
-    return true; // Simplificado (mantive sua lógica)
+    const newErrors = { ...initialErrors };
+    let isValid = true;
+    if (formData.senha !== formData.confirmarSenha) {
+      newErrors.confirmarSenha = "As senhas não coincidem.";
+      isValid = false;
+    }
+    // Adicione outras validações aqui se necessário
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleSubmit = async (e) => {
@@ -124,14 +125,17 @@ export default function TelaCadastroTecnico() {
         matricula: formData.matricula.trim(),
         email: formData.email.trim(),
         senha: formData.senha,
-        status: formData.status,
-        isAdm: formData.isAdm,
         idRegiao: parseInt(formData.idRegiao, 10),
+        // ======================= INÍCIO DA CORREÇÃO =======================
+        // O nome da propriedade deve ser "adm" para corresponder ao DTO do back-end.
+        adm: formData.isAdm,
+        // ======================== FIM DA CORREÇÃO =========================
       };
       await api.post('/tecnicos', payload);
       toast.success("Técnico cadastrado com sucesso!");
-      setFormData(initialFormData);
-      setErrors(initialErrors);
+      setTimeout(() => {
+        navigate(-1); // Volta para a página anterior após o sucesso
+      }, 1500);
     } catch (error) {
       const errorMsg = error.response?.data?.message || "Erro ao cadastrar técnico.";
       toast.error(errorMsg);
@@ -140,7 +144,7 @@ export default function TelaCadastroTecnico() {
     }
   };
 
-  if (isAdminUser === null || (isAdminUser && loadingRegioes)) {
+  if (loadingRegioes) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#A9AD99]">
         <FiLoader className="animate-spin text-4xl text-green-700" />
@@ -196,14 +200,7 @@ export default function TelaCadastroTecnico() {
                   </Select>
                 </FormField>
 
-                <FormField label="Status *" htmlFor="status">
-                  <Select name="status" id="status" value={formData.status} onChange={handleChange} required>
-                    <option value="ATIVO">Ativo</option>
-                    <option value="INATIVO">Inativo</option>
-                  </Select>
-                </FormField>
-
-                <div className="flex items-center">
+                <div className="flex items-center pt-2">
                   <input id="isAdm" name="isAdm" type="checkbox" checked={formData.isAdm} onChange={handleChange} className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500" />
                   <label htmlFor="isAdm" className="ml-3 block text-sm font-medium text-gray-900">Conceder privilégios de Administrador</label>
                 </div>

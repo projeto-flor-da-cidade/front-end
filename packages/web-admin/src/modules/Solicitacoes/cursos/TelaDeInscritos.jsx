@@ -1,4 +1,4 @@
-// src/pages/App/TelaDeInscritos/TelaDeInscritos.jsx
+// Caminho: src/pages/App/TelaDeInscritos/TelaDeInscritos.jsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../../services/api';
@@ -14,11 +14,8 @@ import 'react-toastify/dist/ReactToastify.css';
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A';
   try {
-    const date = new Date(dateString);
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const year = date.getUTCFullYear();
-    return `${day}/${month}/${year}`;
+    // Usar toLocaleDateString é mais robusto para lidar com timezones
+    return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   } catch (e) {
     return dateString;
   }
@@ -69,9 +66,12 @@ export default function TelaDeInscritos() {
     return enrollments
       .filter(enrollment => {
         if (!search) return true;
-        return enrollment.usuario?.nome.toLowerCase().includes(search.toLowerCase());
+        // ======================= INÍCIO DA CORREÇÃO =======================
+        // Acessa a propriedade "achatada" 'nomeUsuario' que vem do DTO
+        return enrollment.nomeUsuario?.toLowerCase().includes(search.toLowerCase());
+        // ======================== FIM DA CORREÇÃO =========================
       })
-      .sort((a, b) => a.usuario?.nome.localeCompare(b.usuario?.nome));
+      .sort((a, b) => (a.nomeUsuario || '').localeCompare(b.nomeUsuario || ''));
   }, [enrollments, search]);
 
   if (isLoading) {
@@ -137,7 +137,7 @@ export default function TelaDeInscritos() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por nome do inscrito..."
-                className="w-full h-12 pl-12 pr-4 border border-gray-300 rounded-lg shadow-sm focus:ring-green-600 focus:border-green-600 bg-[#E6E3DC] text-gray-900"
+                className="w-full h-12 pl-12 pr-4 border border-gray-300 rounded-lg shadow-sm focus:ring-green-600 focus:border-green-600 bg-white text-gray-900"
               />
             </div>
           )}
@@ -146,28 +146,34 @@ export default function TelaDeInscritos() {
         {filteredAndSortedEnrollments.length > 0 ? (
           <div className="bg-[#E6E3DC] rounded-xl shadow-lg overflow-hidden">
             <ul className="divide-y divide-gray-300">
-              {filteredAndSortedEnrollments.map(({ idInscricao, dataInscricao, usuario }) => (
+              {/* ======================= INÍCIO DA CORREÇÃO ======================= */}
+              {/* Desestrutura diretamente as propriedades do objeto 'enrollment' */}
+              {filteredAndSortedEnrollments.map(({ 
+                idInscricao, dataInscricao, nomeUsuario, emailUsuario, 
+                telefoneUsuario, cpfUsuario, dataNascimentoUsuario, escolaridadeUsuario 
+              }) => (
                 <li key={idInscricao} className="p-4 sm:p-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="md:col-span-1 border-b md:border-b-0 md:border-r pb-4 md:pb-0 md:pr-4 border-gray-300">
                       <h2 className="text-lg font-semibold text-green-800 flex items-center mb-3">
                         <FiUser className="w-5 h-5 mr-3 text-gray-700" />
-                        {usuario?.nome || 'Usuário Desconhecido'}
+                        {nomeUsuario || 'Usuário Desconhecido'}
                       </h2>
                       <div className="space-y-2 text-xs text-gray-800">
-                        <p className="flex items-center"><FiMail className="w-3.5 h-3.5 mr-2 text-gray-700" />{usuario?.email || 'N/A'}</p>
-                        <p className="flex items-center"><FiPhone className="w-3.5 h-3.5 mr-2 text-gray-700" />{usuario?.telefone || 'N/A'}</p>
+                        <p className="flex items-center"><FiMail className="w-3.5 h-3.5 mr-2 text-gray-700" />{emailUsuario || 'N/A'}</p>
+                        <p className="flex items-center"><FiPhone className="w-3.5 h-3.5 mr-2 text-gray-700" />{telefoneUsuario || 'N/A'}</p>
                       </div>
                     </div>
                     <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                      <p className="flex items-center"><FiClipboard className="w-4 h-4 mr-2 text-gray-700" /><strong>CPF:</strong><span className="ml-2 text-gray-900">{usuario?.cpf || 'N/A'}</span></p>
-                      <p className="flex items-center"><FiCalendar className="w-4 h-4 mr-2 text-gray-700" /><strong>Nascimento:</strong><span className="ml-2 text-gray-900">{formatDate(usuario?.dataNascimento)}</span></p>
-                      <p className="flex items-center sm:col-span-2"><FiFileText className="w-4 h-4 mr-2 text-gray-700" /><strong>Escolaridade:</strong><span className="ml-2 text-gray-900">{usuario?.escolaridade?.replace(/_/g, ' ') || 'N/A'}</span></p>
+                      <p className="flex items-center"><FiClipboard className="w-4 h-4 mr-2 text-gray-700" /><strong>CPF:</strong><span className="ml-2 text-gray-900">{cpfUsuario || 'N/A'}</span></p>
+                      <p className="flex items-center"><FiCalendar className="w-4 h-4 mr-2 text-gray-700" /><strong>Nascimento:</strong><span className="ml-2 text-gray-900">{formatDate(dataNascimentoUsuario)}</span></p>
+                      <p className="flex items-center sm:col-span-2"><FiFileText className="w-4 h-4 mr-2 text-gray-700" /><strong>Escolaridade:</strong><span className="ml-2 text-gray-900">{escolaridadeUsuario?.replace(/_/g, ' ') || 'N/A'}</span></p>
                       <p className="flex items-center text-xs text-gray-700 sm:col-span-2 mt-2 pt-2 border-t border-dashed w-full"><FiCalendar className="w-3.5 h-3.5 mr-2 text-gray-700" />Inscrito em: {formatDate(dataInscricao)}</p>
                     </div>
                   </div>
                 </li>
               ))}
+              {/* ======================== FIM DA CORREÇÃO ========================= */}
             </ul>
             <div className="p-4 bg-[#E6E3DC] border-t border-gray-300 text-sm font-semibold text-gray-900 text-right">
               Mostrando {filteredAndSortedEnrollments.length} de {enrollments.length} inscritos
