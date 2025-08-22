@@ -1,5 +1,3 @@
-// src/types/api.types.ts
-
 // Enums baseados no backend
 export enum TipoAtividade {
   Curso = 'Curso',
@@ -20,8 +18,7 @@ export enum Turno {
   Noite = 'Noite',
 }
 
-// Interface para o que a API retorna em uma listagem ou busca por ID
-// Baseado no provável CursoResponseDTO
+// Interface para o que a API RETORNA (DTO de Resposta)
 export interface CursoResponse {
   idCurso: number;
   tipoAtividade: TipoAtividade;
@@ -29,22 +26,22 @@ export interface CursoResponse {
   descricao: string;
   local: string;
   fotoBanner?: string;
+  bannerUrl: string; // URL completa e pronta para uso
   instituicao: string;
   publicoAlvo: PublicoAlvo;
-  dataInicio: string;       // "YYYY-MM-DD"
-  dataFim: string;          // "YYYY-MM-DD"
-  dataInscInicio: string;   // "YYYY-MM-DD"
-  dataInscFim: string;      // "YYYY-MM-DD"
+  dataInicio: string;
+  dataFim: string;
+  dataInscInicio: string;
+  dataInscFim: string;
   ativo: boolean;
   turno: Turno;
   maxPessoas: number;
   cargaHoraria: number;
-  dataCriacao: string;      // "YYYY-MM-DDTHH:mm:ss"
-  dataAtualizacao: string;  // "YYYY-MM-DDTHH:mm:ss"
+  dataCriacao: string;
+  dataAtualizacao: string;
 }
 
-// Interface para os dados que enviamos para CRIAR um curso
-// Baseado no CursoRequestDTO
+// ✅ ADICIONADO: Interface para os dados que ENVIAMOS para CRIAR um curso
 export interface CursoRequest {
   tipoAtividade: TipoAtividade;
   nome: string;
@@ -59,11 +56,9 @@ export interface CursoRequest {
   turno: Turno;
   maxPessoas: number;
   cargaHoraria: number;
-  // O campo 'ativo' e 'fotoBanner' são gerenciados pelo backend ou via FormData
 }
 
-// Interface para os dados que enviamos para ATUALIZAR um curso
-// Baseado no CursoUpdateDTO, geralmente os campos são opcionais
+// ✅ ADICIONADO: Interface para os dados que ENVIAMOS para ATUALIZAR um curso
 export interface CursoUpdate {
   tipoAtividade?: TipoAtividade;
   nome?: string;
@@ -81,4 +76,15 @@ export interface CursoUpdate {
   cargaHoraria?: number;
 }
 
-// Adicione outras interfaces de DTOs aqui conforme necessário (Horta, Usuario, etc.)
+// --- Outros Tipos ---
+
+export interface HortaResponse {
+  idHorta: number;
+  nomeHorta: string;
+  endereco: string;
+  latitude?: number;  // Coordenadas podem ser opcionais se nem todas as hortas tiverem
+  longitude?: number;
+  imagemUrl: string;
+  nomeTipoDeHorta: string;
+  nomeUsuario: string;
+}

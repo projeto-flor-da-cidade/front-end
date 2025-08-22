@@ -18,11 +18,7 @@ import TelaRedefinirSenha from "./modules/auth/TelaRedefinirSenha";
 import TelaDeSolicitacaoHortas from "./modules/Solicitacoes/hortas/TelaDeSolicitacaoHortas";
 import TelaDeDescricaoDeSolicitacaoHortas from "./modules/Solicitacoes/hortas/TelaDeDescricaoDeSolicitacaoHortas";
 import TelaEdicaoHorta from "./modules/Solicitacoes/hortas/TelaEdicaoHorta";
-// ======================= INÍCIO DA CORREÇÃO =======================
-// 1. IMPORTA O NOVO COMPONENTE DE EDIÇÃO DE USUÁRIO
-// (Ajuste o caminho se você salvou o arquivo em uma pasta diferente)
-import TelaEdicaoUsuario from "./modules/usuarios/TelaEdicaoUsuario";
-// ======================== FIM DA CORREÇÃO =========================
+import TelaEdicaoUsuario from "./modules/usuarios/TelaEdicaoUsuario"; // Ajustado para a pasta 'usuarios'
 import TelaHortasAtivas from "./modules/Solicitacoes/hortas/TelaHortasAtivas";
 import TelaDeCadastroDeCurso from "./modules/Solicitacoes/cursos/TelaDeCadastroDeCurso";
 import TelaDeCursosAtivos from "./modules/Solicitacoes/cursos/TelaDeCursosAtivos";
@@ -35,11 +31,18 @@ import CriarRelatorioAcompanhamento from "./modules/relatorios/SubTelasRelatorio
 import EditarRelatorio from "./modules/relatorios/SubTelasRelatorio/EditarRelatorio";
 import TelaCadastroTecnico from "./modules/tecnico/TelaCadastroTecnico";
 
+/**
+ * ProtectedLayout é um componente que define a estrutura visual
+ * para todas as páginas que exigem autenticação.
+ * Ele renderiza o Header e, em seguida, a página da rota atual através do <Outlet />.
+ * Como este layout é renderizado dentro de <PrivateRoute />, o Header
+ * automaticamente ganha acesso ao AuthContext.
+ */
 function ProtectedLayout() {
   return (
     <>
       <Header />
-      <main className="pt-16">
+      <main className="pt-16"> {/* padding-top para não ficar embaixo do Header fixo */}
         <Outlet />
       </main>
     </>
@@ -49,14 +52,18 @@ function ProtectedLayout() {
 export default function App() {
   return (
     <Routes>
-      {/* ROTAS PÚBLICAS */}
+      {/* ========================================================== */}
+      {/* ROTAS PÚBLICAS (Acessíveis apenas para usuários não logados) */}
+      {/* ========================================================== */}
       <Route element={<RedirectIfAuth />}>
         <Route path="/" element={<TelaDeLoginAdmin />} />
         <Route path="/recuperar-senha" element={<TelaSolicitarRecuperacao />} />
         <Route path="/redefinir-senha/:token" element={<TelaRedefinirSenha />} />
       </Route>
 
-      {/* ROTAS PROTEGIDAS */}
+      {/* ========================================================== */}
+      {/* ROTAS PROTEGIDAS (Acessíveis apenas para usuários logados)   */}
+      {/* ========================================================== */}
       <Route element={<PrivateRoute />}>
         <Route path="/app" element={<ProtectedLayout />}>
           <Route index element={<Navigate to="home" replace />} />
@@ -65,12 +72,7 @@ export default function App() {
           <Route path="tela-de-descricao-de-solicitacao-hortas/:id" element={<TelaDeDescricaoDeSolicitacaoHortas />} />
           <Route path="tela-hortas-ativas" element={<TelaHortasAtivas />} />
           <Route path="hortas-editar/:id" element={<TelaEdicaoHorta />} />
-          
-          {/* ======================= INÍCIO DA CORREÇÃO ======================= */}
-          {/* 2. ADICIONA A NOVA ROTA PARA A EDIÇÃO DE USUÁRIO */}
           <Route path="usuarios-editar/:id" element={<TelaEdicaoUsuario />} />
-          {/* ======================== FIM DA CORREÇÃO ========================= */}
-
           <Route path="tela-de-cadastro-de-curso" element={<TelaDeCadastroDeCurso />} />
           <Route path="tela-de-cursos-ativos" element={<TelaDeCursosAtivos />} />
           <Route path="tela-de-edicao-de-cursos/:id" element={<TelaDeEdicaoDeCursos />} />
@@ -81,11 +83,12 @@ export default function App() {
           <Route path="criar-relatorio-acompanhamento" element={<CriarRelatorioAcompanhamento />} />
           <Route path="editar-relatorio/:id" element={<EditarRelatorio />} />
           <Route path="tela-de-cadastro-tecnico" element={<TelaCadastroTecnico />} />
+          {/* Redireciona qualquer rota protegida inválida para a home do app */}
           <Route path="*" element={<Navigate to="home" replace />} />
         </Route>
       </Route>
 
-      {/* Redireciona qualquer outra rota inválida */}
+      {/* Redireciona qualquer outra rota inválida para a raiz (login) */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

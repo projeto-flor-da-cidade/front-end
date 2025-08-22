@@ -1,48 +1,69 @@
+// Caminho: src/modules/Home/components/Header.jsx
+
 import React, { useState, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // useNavigate foi removido
 import { FaBars, FaTimes } from "react-icons/fa";
 import userIcon from "../../../assets/person-circle-outline.svg";
 import { useClickOutside } from "../../../hooks/useClickOutside";
-import { useAuth } from "../../../contexts/AuthContext"; // 1. Importado o hook `useAuth`
+import { useAuth } from "../../../contexts/AuthContext";
 
 const headerMenu = [
-  {
-    label: "Serviços",
-    items: [
-      { name: "Solicitações de Hortas", to: "/app/tela-de-solicitacao-hortas", enabled: true },
-      { name: "Cadastro de Cursos",    to: "/app/tela-de-cadastro-de-curso",    enabled: true },
-    ],
-  },
-  {
-    label: "Consultas",
-    items: [
-      { name: "Hortas Ativas", to: "/app/tela-hortas-ativas", enabled: true },
-      { name: "Cursos Ativos", to: "/app/tela-de-cursos-ativos", enabled: true },
-      { name: "Registros de Solicitações", to: "#", enabled: false },
-      { name: "Registros de Cursos",       to: "#", enabled: false },
-    ],
-  },
-  {
-    label: "Ferramentas",
-    items: [
-      { name: "Usuários",      to: "/app/tela-de-cadastro-tecnico",  enabled: true },
-      { name: "Configurações", to: "#",                  enabled: false },
-      { name: "Relatórios",    to: "/app/tela-de-relatorios", enabled: true },
-    ],
-  },
+    {
+        label: "Serviços",
+        items: [
+          { name: "Solicitações de Hortas", to: "/app/tela-de-solicitacao-hortas", enabled: true },
+          { name: "Cadastro de Cursos",    to: "/app/tela-de-cadastro-de-curso",    enabled: true },
+        ],
+      },
+      {
+        label: "Consultas",
+        items: [
+          { name: "Hortas Ativas", to: "/app/tela-hortas-ativas", enabled: true },
+          { name: "Cursos Ativos", to: "/app/tela-de-cursos-ativos", enabled: true },
+          { name: "Registros de Solicitações", to: "#", enabled: false },
+          { name: "Registros de Cursos",       to: "#", enabled: false },
+        ],
+      },
+      {
+        label: "Ferramentas",
+        items: [
+          { name: "Usuários",      to: "/app/tela-de-cadastro-tecnico",  enabled: true },
+          { name: "Configurações", to: "#",                  enabled: false },
+          { name: "Relatórios",    to: "/app/tela-de-relatorios", enabled: true },
+        ],
+    },
 ];
+
+const NavLink = ({ to, name, location, setOpenDropdown, setMobileOpen }) => (
+  <Link
+    to={to}
+    onClick={() => {
+      if (setOpenDropdown) setOpenDropdown(null);
+      if (setMobileOpen) setMobileOpen(false);
+    }}
+    className={`block w-full text-left px-4 py-2 font-open-sans text-[16px] transition-colors duration-150 rounded ${
+      location.pathname === to ? "bg-[#b0b49a] font-semibold text-gray-800" : "text-gray-700 hover:bg-[#e0e3d0]"
+    }`}
+  >
+    {name}
+  </Link>
+);
+
+const DisabledLink = ({ name }) => (
+  <span className="block px-4 py-2 font-open-sans text-[16px] text-gray-400 opacity-60 cursor-not-allowed">
+    {name}
+  </span>
+);
 
 export default function Header() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { logout, user } = useAuth(); // 2. Usando o contexto para obter a função logout e os dados do usuário
+  const { logout, user } = useAuth();
 
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mobileOpen, setMobileOpen]     = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const dropdownsRef = useRef(null);
-  // dois refs para o menu do usuário (mobile e desktop) — usamos ambos em useClickOutside
   const userMenuRefMobile = useRef(null);
   const userMenuRefDesktop = useRef(null);
   const mobileMenuAndBurgerRef = useRef(null);
@@ -56,50 +77,30 @@ export default function Header() {
     }
   });
   
-  // Pega o primeiro nome do usuário diretamente do objeto 'user' do AuthContext
-  const userName = user?.nome ? user.nome.split(" ")[0] : "Usuário";
+  const userName = user?.nome?.split(" ")[0] || "Usuário";
 
-  // 3. Função de logout agora chama a função centralizada do AuthContext
-  const handleLogout = async () => {
+  // ======================= INÍCIO DA CORREÇÃO =======================
+  // A função de logout agora é síncrona e apenas dispara a ação no AuthContext.
+  // Ela não é mais responsável pela navegação. A navegação ocorrerá
+  // de forma reativa no PrivateRoute quando o estado 'isAuthenticated' mudar.
+  const handleLogout = () => {
+    logout();
+    // Apenas fecha os menus para feedback visual imediato.
     setUserMenuOpen(false); 
     setMobileOpen(false); 
-    await logout(); // Esta função limpa o estado, o localStorage e chama a API
-    navigate("/");  // Após o logout, redireciona para a página de login
   };
-
-  const NavLink = ({ to, name, onClick }) => (
-    <Link
-      to={to}
-      onClick={() => {
-        if (onClick) onClick();
-        setOpenDropdown(null);
-        setMobileOpen(false);
-      }}
-      className={`block w-full text-left px-4 py-2 font-open-sans text-[16px] transition-colors duration-150 rounded ${
-        location.pathname === to ? "bg-[#b0b49a] font-semibold text-gray-800" : "text-gray-700 hover:bg-[#e0e3d0]"
-      }`}
-    >
-      {name}
-    </Link>
-  );
-
-  const DisabledLink = ({ name }) => (
-    <span className="block px-4 py-2 font-open-sans text-[16px] text-gray-400 opacity-60 cursor-not-allowed">
-      {name}
-    </span>
-  );
+  // ======================== FIM DA CORREÇÃO =========================
 
   return (
     <header ref={mobileMenuAndBurgerRef} className="fixed inset-x-0 top-0 bg-[#d9d9d9] shadow-md z-50">
       <div className="relative max-w-7xl mx-auto h-16 flex items-center px-4 sm:px-6 lg:px-8">
 
-        {/* ----- MOBILE LEFT: user icon (visible only on mobile) ----- */}
+        {/* ----- MOBILE LEFT: user icon ----- */}
         <div className="flex items-center md:hidden">
           <div ref={userMenuRefMobile} className="relative">
             <button onClick={() => setUserMenuOpen(o => !o)} aria-haspopup="true" aria-expanded={userMenuOpen} className="flex items-center gap-2 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#699530]">
               <img src={userIcon} alt="Menu do usuário" className="w-9 h-9" />
             </button>
-            {/* mobile dropdown (anchored to left) */}
             <ul className={`absolute left-0 top-full mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-50 transition-all duration-200 ease-out origin-top-left ${userMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
               <li>
                 <button
@@ -113,7 +114,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* ----- CENTER: title (centered on mobile, normal flow on md+) ----- */}
+        {/* ----- CENTER: title ----- */}
         <Link to="/app/home" className="absolute left-1/2 transform -translate-x-1/2 md:static md:transform-none text-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#699530] rounded-sm">
           <span className="text-[#699530] font-anton font-bold text-lg sm:text-xl md:text-2xl leading-none block">
             Flor da Cidade
@@ -142,7 +143,7 @@ export default function Header() {
                       ${openDropdown === idx ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
                       {items.map(({ name, to, enabled }) => (
                       <li key={name}>
-                          {enabled ? <NavLink to={to} name={name} /> : <DisabledLink name={name} />}
+                          {enabled ? <NavLink to={to} name={name} location={location} setOpenDropdown={setOpenDropdown} /> : <DisabledLink name={name} />}
                       </li>
                       ))}
                   </ul>
@@ -153,8 +154,13 @@ export default function Header() {
             <div className="h-6 w-px bg-gray-400 mx-4 hidden md:block" />
 
             {/* desktop user (visible only on md+) */}
-            <div className="relative hidden md:block" ref={userMenuRefDesktop}>
-                <button onClick={() => setUserMenuOpen(o => !o)} aria-haspopup="true" aria-expanded={userMenuOpen} className="flex items-center gap-2 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#699530]">
+            <div ref={userMenuRefDesktop} className="relative hidden md:block">
+                <button 
+                  onClick={() => setUserMenuOpen(o => !o)} 
+                  aria-haspopup="true" 
+                  aria-expanded={userMenuOpen} 
+                  className="flex items-center gap-2 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#699530]"
+                >
                   <img src={userIcon} alt="Menu do usuário" className="w-9 h-9" />
                   <span className="hidden lg:block text-sm font-medium text-gray-700">{userName}</span>
                 </button>
@@ -182,6 +188,7 @@ export default function Header() {
         </div>
       </div>
 
+      {/* mobile dropdown */}
       <div className={`md:hidden bg-white border-t border-gray-200 shadow-lg transition-max-height duration-300 ease-in-out overflow-y-auto ${mobileOpen ? 'max-h-[calc(100vh-4rem)]' : 'max-h-0'}`}>
         <ul className="divide-y divide-y-gray-100 px-2 py-2">
           {headerMenu.map(({ label, items }) => (
@@ -189,7 +196,7 @@ export default function Header() {
               <p className="font-open-sans font-semibold text-gray-500 text-xs uppercase px-3 mb-1">{label}</p>
               <div className="space-y-1">
                 {items.map(({ name, to, enabled }) =>
-                  enabled ? <NavLink key={name} to={to} name={name} /> : <DisabledLink key={name} name={name} />
+                  enabled ? <NavLink key={name} to={to} name={name} location={location} setMobileOpen={setMobileOpen} /> : <DisabledLink key={name} name={name} />
                 )}
               </div>
             </li>
