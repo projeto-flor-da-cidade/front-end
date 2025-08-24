@@ -20,8 +20,7 @@ import novidadesImg from '../../assets/images/novidades.jpg';
 import adrianaImg from '../../assets/images/adrianafigueira.jpg';
 import fallbackImage from '../../assets/images/FolhinSemImagem.png';
 
-// ✅ CONFIRMADO: Este código está correto e pronto para funcionar
-// após o ajuste da porta no arquivo .env e o reinício dos servidores.
+
 export default function Home() {
   const [seauCourses, setSeauCourses] = useState<CursoResponse[]>([]);
   const [externalCourses, setExternalCourses] = useState<CursoResponse[]>([]);
@@ -169,12 +168,19 @@ export default function Home() {
     </div>
   );
 
+  const homePageNavLinks = [
+    { label: 'Apoio a Hortas', targetId: '#acolhimentos' },
+    { label: 'Cursos', targetId: '#cursos' },
+    { label: 'Informativos', targetId: '#informativos' }
+  ];
+
   return (
     <div className="font-sans text-[#1D3557]">
       <Header
         isMenuOpen={isAccessibilityMenuOpen}
         onMenuToggle={() => setAccessibilityMenuOpen(prev => !prev)}
         accessibilityHandlers={{ fontHandlers, darkModeHandler, ttsHandler }}
+        navLinks={homePageNavLinks}
         onNavClick={handleNavClick}
       />
       <main className="mx-auto max-w-7xl px-4 space-y-12 md:space-y-16 my-8">
@@ -182,24 +188,45 @@ export default function Home() {
           <h2 className="text-4xl md:text-5xl font-extrabold text-[#1D3557]">Bem-vindo ao Portal Flor da Cidade</h2>
           <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Sua plataforma completa para a agricultura urbana no Recife. Explore nossos serviços, cursos e novidades para cultivar um futuro mais verde e sustentável.</p>
         </div>
-        <div className="relative z-10 bg-white py-12 md:py-16 rounded-3xl shadow-lg px-4 md:px-8">
+
+        {/* AJUSTE: Adicionada margem superior negativa (-mt-8) para reduzir o espaço */}
+        <div className="relative z-10 -mt-8">
           <h2 className="text-4xl font-extrabold text-center text-[#1D3557] mb-10">Nossos Serviços</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {serviceCards.map((card, i) => (
-              <a key={i} href={card.targetId} onClick={(e) => handleNavClick(e, card.targetId)} className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                <img src={card.img} alt={card.alt} className="h-48 w-full object-cover" />
-                <div className="flex flex-1 flex-col bg-[#e7eff6] justify-between p-5">
-                  <div>
-                    <h3 className="text-xl font-bold text-[#1D3557] mb-2">{card.title}</h3>
-                    <p className="text-gray-600 mb-4 text-sm">{card.text}</p>
-                  </div>
-                  <span className="self-start rounded-full bg-[#F4D35E] px-5 py-2 font-bold text-sm text-[#1D3557] transition-colors duration-300 group-hover:bg-[#FFE46B]">Saiba mais</span>
+              <a
+                key={i}
+                href={card.targetId}
+                onClick={(e) => handleNavClick(e, card.targetId)}
+                className="group relative h-[400px] rounded-2xl overflow-hidden shadow-lg 
+                           transition-all duration-300 ease-in-out 
+                           hover:shadow-2xl hover:!z-20 hover:-translate-y-2"
+              >
+                <img
+                  src={card.img}
+                  alt={card.alt}
+                  className="absolute inset-0 w-full h-full object-cover 
+                             transition-transform duration-300 ease-in-out 
+                             group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                <div className="relative z-10 flex h-full flex-col justify-end p-6 text-white [text-shadow:2px_2px_4px_rgba(0,0,0,0.7)]">
+                  <h3 className="text-3xl font-bold mb-2 transition-colors duration-300 group-hover:text-[#F4D35E]">
+                    {card.title}
+                  </h3>
+                  <p className="mb-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                    {card.text}
+                  </p>
                 </div>
               </a>
             ))}
           </div>
         </div>
-        <AcolhimentosSection onSolicitarClick={() => setIsHortaModalOpen(true)} />
+        
+        <div id="acolhimentos">
+          <AcolhimentosSection onSolicitarClick={() => setIsHortaModalOpen(true)} />
+        </div>
+        
         <div id="cursos" className="relative z-10 bg-white py-12 md:py-16 rounded-3xl shadow-lg px-4 md:px-8">
           {loading && <p className="text-center text-lg">Carregando cursos...</p>}
           {error && <p className="text-center text-red-600 font-bold">{error}</p>}
@@ -210,7 +237,11 @@ export default function Home() {
             </div>
           )}
         </div>
-        <InformativosSection />
+        
+        <div id="informativos">
+          <InformativosSection />
+        </div>
+
         <div id="pancs" className="relative z-10 bg-white py-12 md:py-16 rounded-3xl shadow-lg px-4 md:px-8">
           <h2 className="text-4xl font-extrabold text-center text-[#1D3557] mb-12">PANCs e suas Receitas</h2>
           <div className="max-w-6xl mx-auto space-y-16">
