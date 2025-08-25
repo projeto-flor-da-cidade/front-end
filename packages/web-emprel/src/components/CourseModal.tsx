@@ -1,5 +1,4 @@
-// src/components/CourseModal.tsx
-
+// Caminho: src/components/CourseModal.tsx
 import React from 'react';
 import { FaTimes, FaMapMarkerAlt } from 'react-icons/fa';
 import { CursoResponse } from '../types/api.types';
@@ -16,7 +15,7 @@ const CourseModal: React.FC<CourseModalProps> = ({ course, onClose, onInscricaoC
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Data não informada';
     try {
-      const date = new Date(dateString + 'T00:00:00');
+      const date = new Date(dateString + 'T00:00:00'); // Força interpretação como UTC
       return date.toLocaleDateString('pt-BR');
     } catch (error) {
       console.error("Erro ao formatar data:", error);

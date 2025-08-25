@@ -1,3 +1,4 @@
+// Caminho: src/pages/app/hortas/TelaDeDescricaoDeSolicitacaoHortas.js
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import api, { BACKEND_URL } from '../../../services/api';
@@ -91,7 +92,9 @@ export default function TelaDeDescricaoDeSolicitacaoHortas() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isImageModalOpen, setImageModalOpen] = useState(false);
   
-  const imageUrl = useMemo(() => getImageUrl(horta?.imageUrl), [horta?.imageUrl]);
+  // CORREÇÃO: O nome do campo no DTO é 'imagemUrl' (i minúsculo).
+  // Acessar o campo correto resolve o problema da imagem não carregar.
+  const imageUrl = useMemo(() => getImageUrl(horta?.imagemUrl), [horta?.imagemUrl]);
   const statusInfo = useMemo(() => HORTA_STATUS_CONFIG[horta?.statusHorta] || { label: horta?.statusHorta, color: 'text-gray-800 bg-gray-200' }, [horta?.statusHorta]);
   
   const fetchHortaDetails = useCallback(async () => {
@@ -131,11 +134,12 @@ export default function TelaDeDescricaoDeSolicitacaoHortas() {
     }
   }, [horta, navigate, location.state]);
   
+  // CORREÇÃO: Os dados do usuário agora vêm de um objeto aninhado `horta.usuario`.
   const handleWhatsAppClick = useCallback(() => {
-    if (!horta?.telefoneUsuario) return toast.warn("Telefone do solicitante não disponível.");
-    const numeroLimpo = horta.telefoneUsuario.replace(/\D/g, '');
+    if (!horta?.usuario?.telefone) return toast.warn("Telefone do solicitante não disponível.");
+    const numeroLimpo = horta.usuario.telefone.replace(/\D/g, '');
     const numeroWhatsApp = numeroLimpo.length <= 11 ? `55${numeroLimpo}` : numeroLimpo;
-    const mensagem = encodeURIComponent(`Olá, ${horta.nomeUsuario}! Entro em contato sobre a horta "${horta.nomeHorta}" para agendarmos uma visita.`);
+    const mensagem = encodeURIComponent(`Olá, ${horta.usuario.nome}! Entro em contato sobre a horta "${horta.nomeHorta}" para agendarmos uma visita.`);
     window.open(`https://wa.me/${numeroWhatsApp}?text=${mensagem}`, '_blank');
   }, [horta]);
 
@@ -158,7 +162,6 @@ export default function TelaDeDescricaoDeSolicitacaoHortas() {
     <div className="min-h-screen bg-[#A9AD99] font-poppins pt-10 sm:pt-16 pb-10">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} theme="colored" />
       <div className="container mx-auto px-3 sm:px-4">
-        {/* PAINEL CENTRAL - MAIOR (aprox. equivalente ao traçado vermelho) */}
         <div className="mx-auto w-full max-w-[1800px] bg-[#E6E3DC] rounded-xl p-6 sm:px-8 shadow-xl">
           <header className="mb-8 pb-4 text-center md:text-left border-b border-gray-200">
             <button onClick={() => navigate(-1)} className="text-sm text-blue-600 hover:underline mb-2 inline-flex items-center">
@@ -171,16 +174,20 @@ export default function TelaDeDescricaoDeSolicitacaoHortas() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <main className="lg:col-span-2 space-y-6">
+              {/*
+                * CORREÇÃO: Os dados do solicitante agora são acessados através do objeto aninhado 'horta.usuario'.
+                * O uso de optional chaining (?.), como em 'horta.usuario?.nome', garante que o
+                * código não quebre caso o objeto de usuário não seja retornado pela API.
+              */}
               <Section title="Informações do Solicitante" icon={FiUser}>
                 <InfoGrid cols={2}>
-                  <InfoItem label="Nome" value={horta.nomeUsuario} />
-                  <InfoItem label="CPF" value={horta.cpfUsuario} />
-                  <InfoItem label="Email" value={horta.emailUsuario} href={horta.emailUsuario ? `mailto:${horta.emailUsuario}`: undefined} />
-                  <InfoItem label="Telefone" value={horta.telefoneUsuario} />
-                  <InfoItem label="Nascimento" value={formatDate(horta.dataNascimentoUsuario)} />
-                  <InfoItem label="Escolaridade" value={horta.escolaridadeUsuario?.replace(/_/g, ' ')} />
-                  <InfoItem label="Endereço" value={horta.enderecoUsuario} />
-                  <InfoItem label="Status" value={horta.ativoUsuario ? 'Ativo' : 'Inativo'} />
+                  <InfoItem label="Nome" value={horta.usuario?.nome} />
+                  <InfoItem label="CPF" value={horta.usuario?.cpf} />
+                  <InfoItem label="Email" value={horta.usuario?.email} href={horta.usuario?.email ? `mailto:${horta.usuario.email}`: undefined} />
+                  <InfoItem label="Telefone" value={horta.usuario?.telefone} />
+                  <InfoItem label="Nascimento" value={formatDate(horta.usuario?.dataNascimento)} />
+                  <InfoItem label="Escolaridade" value={horta.usuario?.escolaridade?.replace(/_/g, ' ')} />
+                  <InfoItem label="Endereço" value={horta.usuario?.endereco} />
                   <InfoItem label="Função na Horta" value={horta.funcaoUniEnsino} />
                 </InfoGrid>
               </Section>
@@ -242,4 +249,3 @@ export default function TelaDeDescricaoDeSolicitacaoHortas() {
     </div>
   );
 }
-

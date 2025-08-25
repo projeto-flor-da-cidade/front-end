@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../../services/api';
 
-import Header from '../../Home/components/Header';
+import Header from '../../Home/components/Header'; // Assumindo o caminho correto
 import {
   FiUser, FiMail, FiCalendar, FiLoader, FiAlertCircle,
   FiArrowLeft, FiInbox, FiPhone, FiClipboard, FiFileText, FiSearch
@@ -14,7 +14,6 @@ import 'react-toastify/dist/ReactToastify.css';
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A';
   try {
-    // Usar toLocaleDateString é mais robusto para lidar com timezones
     return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   } catch (e) {
     return dateString;
@@ -40,15 +39,27 @@ export default function TelaDeInscritos() {
     setIsLoading(true);
     setError(null);
     try {
+      // Usamos Promise.all para buscar dados em paralelo, o que é ótimo para performance.
       const [courseResponse, enrollmentsResponse] = await Promise.all([
         api.get(`/cursos/${courseId}`),
         api.get(`/cursos/${courseId}/inscricoes`)
       ]);
+
+      // ======================= PASSO DE DEBUG IMPORTANTE =======================
+      // Esta linha é crucial. Verifique o console do seu navegador (F12).
+      // Ela vai nos mostrar exatamente os dados que a API está enviando.
+      // Se o novo usuário estiver aqui, o problema é de renderização.
+      // Se ele não estiver, o problema ainda está no backend.
+      console.log('Dados recebidos da API de inscrições:', enrollmentsResponse.data);
+      // =========================================================================
+
       setCourseName(courseResponse.data.nome || 'Curso');
       setEnrollments(enrollmentsResponse.data || []);
     } catch (err) {
       let errorMessage = "Não foi possível carregar os dados dos inscritos.";
-      if (err.response?.status === 404) {
+      if (err.response?.status === 403) {
+          errorMessage = "Acesso negado. Você não tem permissão para ver esta lista.";
+      } else if (err.response?.status === 404) {
         errorMessage = "Curso ou informações de inscrição não encontrados.";
       }
       setError(errorMessage);
@@ -63,13 +74,11 @@ export default function TelaDeInscritos() {
   }, [fetchData]);
 
   const filteredAndSortedEnrollments = useMemo(() => {
+    if (!enrollments) return [];
     return enrollments
       .filter(enrollment => {
         if (!search) return true;
-        // ======================= INÍCIO DA CORREÇÃO =======================
-        // Acessa a propriedade "achatada" 'nomeUsuario' que vem do DTO
         return enrollment.nomeUsuario?.toLowerCase().includes(search.toLowerCase());
-        // ======================== FIM DA CORREÇÃO =========================
       })
       .sort((a, b) => (a.nomeUsuario || '').localeCompare(b.nomeUsuario || ''));
   }, [enrollments, search]);
@@ -146,8 +155,6 @@ export default function TelaDeInscritos() {
         {filteredAndSortedEnrollments.length > 0 ? (
           <div className="bg-[#E6E3DC] rounded-xl shadow-lg overflow-hidden">
             <ul className="divide-y divide-gray-300">
-              {/* ======================= INÍCIO DA CORREÇÃO ======================= */}
-              {/* Desestrutura diretamente as propriedades do objeto 'enrollment' */}
               {filteredAndSortedEnrollments.map(({ 
                 idInscricao, dataInscricao, nomeUsuario, emailUsuario, 
                 telefoneUsuario, cpfUsuario, dataNascimentoUsuario, escolaridadeUsuario 
@@ -173,7 +180,6 @@ export default function TelaDeInscritos() {
                   </div>
                 </li>
               ))}
-              {/* ======================== FIM DA CORREÇÃO ========================= */}
             </ul>
             <div className="p-4 bg-[#E6E3DC] border-t border-gray-300 text-sm font-semibold text-gray-900 text-right">
               Mostrando {filteredAndSortedEnrollments.length} de {enrollments.length} inscritos

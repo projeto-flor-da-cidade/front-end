@@ -1,22 +1,13 @@
 // Caminho: seu-projeto-frontend/src/pages/TelaEdicaoHorta.jsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api, { BACKEND_URL } from '../../../services/api';
-import { FiUpload, FiSave, FiRotateCcw, FiImage, FiLoader, FiAlertCircle, FiChevronLeft, FiEdit } from 'react-icons/fi';
+import { FiUpload, FiSave, FiRotateCcw, FiLoader, FiAlertCircle, FiChevronLeft, FiEdit } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import placeholderHorta from '../../../assets/images/folhin.png';
 
 const PLACEHOLDER_IMAGE_HORTA = placeholderHorta;
-
-const initialFormDataState = {
-  nomeHorta: '', funcaoUniEnsino: '', ocupacaoPrincipal: '', endereco: '', enderecoAlternativo: '',
-  tamanhoAreaProducao: '', caracteristicaGrupo: '', qntPessoas: '', atividadeDescricao: '',
-  parceria: '', statusHorta: 'PENDENTE',
-  nomeUsuario: '',
-  idUnidadeEnsino: '', idAreaClassificacao: '', idAtividadesProdutivas: '', idTipoDeHorta: '',
-};
 
 const Section = ({ title, children }) => (
   <section className="p-5 bg-[#E6E3DC] rounded-lg shadow">
@@ -24,6 +15,25 @@ const Section = ({ title, children }) => (
     {children}
   </section>
 );
+
+const populateFormFromData = (data) => ({
+  nomeHorta: data.nomeHorta || '',
+  funcaoUniEnsino: data.funcaoUniEnsino || '',
+  ocupacaoPrincipal: data.ocupacaoPrincipal || '',
+  endereco: data.endereco || '',
+  enderecoAlternativo: data.enderecoAlternativo || '',
+  tamanhoAreaProducao: data.tamanhoAreaProducao?.toString() || '',
+  caracteristicaGrupo: data.caracteristicaGrupo || '',
+  qntPessoas: data.qntPessoas?.toString() || '',
+  atividadeDescricao: data.atividadeDescricao || '',
+  parceria: data.parceria || '',
+  statusHorta: data.statusHorta || 'PENDENTE',
+  nomeUsuario: data.usuario?.nome || 'N/A',
+  idUnidadeEnsino: data.idUnidadeEnsino?.toString() || '',
+  idAreaClassificacao: data.idAreaClassificacao?.toString() || '',
+  idAtividadesProdutivas: data.idAtividadesProdutivas?.toString() || '',
+  idTipoDeHorta: data.idTipoDeHorta?.toString() || '',
+});
 
 export default function TelaEdicaoHorta() {
   const { id: hortaIdFromParams } = useParams();
@@ -49,7 +59,10 @@ export default function TelaEdicaoHorta() {
       const [tiposRes, unidadesRes, areasRes, atividadesRes] = await Promise.all([
         api.get('/tipos-horta'),
         api.get('/unidades-ensino'),
-        api.get('/hortas/areas-classificacao'),
+        // ======================= INÍCIO DA CORREÇÃO =======================
+        // A chamada agora aponta para a rota padronizada e consistente.
+        api.get('/areas-classificacao'),
+        // ======================== FIM DA CORREÇÃO =========================
         api.get('/atividades-produtivas'),
       ]);
       setTiposDeHortaOptions(tiposRes.data || []);
@@ -64,9 +77,7 @@ export default function TelaEdicaoHorta() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchDropdownOptions();
-  }, [fetchDropdownOptions]);
+  useEffect(() => { fetchDropdownOptions(); }, [fetchDropdownOptions]);
 
   const fetchHortaData = useCallback(async () => {
     if (!hortaIdFromParams || optionsLoading) return;
@@ -76,27 +87,10 @@ export default function TelaEdicaoHorta() {
       const response = await api.get(`/hortas/${hortaIdFromParams}`);
       const data = response.data;
       setOriginalHorta(data);
-      setFormData({
-        nomeHorta: data.nomeHorta || '',
-        funcaoUniEnsino: data.funcaoUniEnsino || '',
-        ocupacaoPrincipal: data.ocupacaoPrincipal || '',
-        endereco: data.endereco || '',
-        enderecoAlternativo: data.enderecoAlternativo || '',
-        tamanhoAreaProducao: data.tamanhoAreaProducao?.toString() || '',
-        caracteristicaGrupo: data.caracteristicaGrupo || '',
-        qntPessoas: data.qntPessoas?.toString() || '',
-        atividadeDescricao: data.atividadeDescricao || '',
-        parceria: data.parceria || '',
-        statusHorta: data.statusHorta || 'PENDENTE',
-        nomeUsuario: data.nomeUsuario || 'N/A',
-        idUnidadeEnsino: data.idUnidadeEnsino?.toString() || '',
-        idAreaClassificacao: data.idAreaClassificacao?.toString() || '',
-        idAtividadesProdutivas: data.idAtividadesProdutivas?.toString() || '',
-        idTipoDeHorta: data.idTipoDeHorta?.toString() || '',
-      });
+      setFormData(populateFormFromData(data));
 
       if (data.imagemUrl && !data.imagemUrl.endsWith('folhin.png')) {
-        setImagemPreview(`${BACKEND_URL}${data.imagemUrl}`);
+        setImagemPreview(`${BACKEND_URL}${data.imagemUrl.replace('/api', '')}`);
       } else {
         setImagemPreview(PLACEHOLDER_IMAGE_HORTA);
       }
@@ -108,21 +102,7 @@ export default function TelaEdicaoHorta() {
     }
   }, [hortaIdFromParams, optionsLoading]);
   
-  useEffect(() => {
-    fetchHortaData();
-  }, [fetchHortaData]);
-
-  useEffect(() => {
-    const handleFocus = () => {
-        if (originalHorta) {
-            fetchHortaData();
-        }
-    };
-    window.addEventListener('focus', handleFocus);
-    return () => {
-        window.removeEventListener('focus', handleFocus);
-    };
-  }, [originalHorta, fetchHortaData]);
+  useEffect(() => { fetchHortaData(); }, [fetchHortaData]);
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -132,7 +112,7 @@ export default function TelaEdicaoHorta() {
   const handleImageChange = useCallback((e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) { // 5MB
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
         toast.error("A imagem é muito grande. Máximo de 5MB.");
         e.target.value = null;
         return;
@@ -149,6 +129,7 @@ export default function TelaEdicaoHorta() {
     
     const hortaUpdateDTO = {
         nomeHorta: formData.nomeHorta,
+        statusHorta: formData.statusHorta,
         funcaoUniEnsino: formData.funcaoUniEnsino,
         ocupacaoPrincipal: formData.ocupacaoPrincipal,
         endereco: formData.endereco,
@@ -158,7 +139,6 @@ export default function TelaEdicaoHorta() {
         qntPessoas: parseInt(formData.qntPessoas, 10) || 0,
         atividadeDescricao: formData.atividadeDescricao,
         parceria: formData.parceria,
-        statusHorta: formData.statusHorta,
         idUnidadeEnsino: parseInt(formData.idUnidadeEnsino, 10) || null,
         idAreaClassificacao: parseInt(formData.idAreaClassificacao, 10) || null,
         idAtividadesProdutivas: parseInt(formData.idAtividadesProdutivas, 10) || null,
@@ -176,14 +156,14 @@ export default function TelaEdicaoHorta() {
       const response = await api.put(`/hortas/${hortaIdFromParams}`, submissionPayload, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
+      const updatedData = response.data;
       toast.success('Horta atualizada com sucesso!');
       
-      const updatedData = response.data;
       setOriginalHorta(updatedData);
+      setFormData(populateFormFromData(updatedData));
       
       if (updatedData.imagemUrl && !updatedData.imagemUrl.endsWith('folhin.png')) {
-        setImagemPreview(`${BACKEND_URL}${updatedData.imagemUrl}?t=${new Date().getTime()}`);
+        setImagemPreview(`${BACKEND_URL}${updatedData.imagemUrl.replace('/api', '')}?t=${new Date().getTime()}`);
       } else {
         setImagemPreview(PLACEHOLDER_IMAGE_HORTA);
       }
@@ -196,18 +176,22 @@ export default function TelaEdicaoHorta() {
       setIsSubmitting(false);
     }
   }, [hortaIdFromParams, formData, imagemFile, navigate]);
-
+  
   const handleResetForm = useCallback(() => {
     if (originalHorta) {
-      fetchHortaData();
-      setImagemFile(null);
-      toast.info("Formulário restaurado para os valores originais.");
+        setFormData(populateFormFromData(originalHorta));
+        if (originalHorta.imagemUrl && !originalHorta.imagemUrl.endsWith('folhin.png')) {
+            setImagemPreview(`${BACKEND_URL}${originalHorta.imagemUrl.replace('/api', '')}`);
+        } else {
+            setImagemPreview(PLACEHOLDER_IMAGE_HORTA);
+        }
+        setImagemFile(null);
+        toast.info("Formulário restaurado para os valores originais.");
     }
-  }, [originalHorta, fetchHortaData]);
+  }, [originalHorta]);
 
-  if (isLoading || !formData || !imagemPreview) return <div className="flex flex-col min-h-screen items-center justify-center p-4 bg-[#A9AD99]"><FiLoader className="animate-spin text-5xl text-gray-700" /><p className="mt-4 text-lg text-gray-900">Carregando dados...</p></div>;
+  if (isLoading || !formData) return <div className="flex flex-col min-h-screen items-center justify-center p-4 bg-[#A9AD99]"><FiLoader className="animate-spin text-5xl text-gray-700" /><p className="mt-4 text-lg text-gray-900">Carregando dados...</p></div>;
   if (error) return <div className="flex flex-col min-h-screen items-center justify-center p-4 text-center bg-[#A9AD99]"><FiAlertCircle className="text-5xl text-red-600 mb-3" /><p className="text-lg font-semibold text-red-600">Erro ao Carregar</p><span className="text-red-600">{error}</span><button onClick={() => navigate(-1)} className="mt-6 px-5 py-2 bg-[#E6E3DC] text-gray-900 rounded-md hover:bg-[#e0dbcf] transition">Voltar</button></div>;
-  if (hortaIdFromParams && !originalHorta && !isLoading) return <div className="flex flex-col min-h-screen items-center justify-center p-4 text-center bg-[#A9AD99]"><FiAlertCircle className="text-5xl text-orange-600 mb-3" /><p className="text-lg font-semibold text-orange-600">Horta não encontrada</p><span className="text-orange-600">A horta com o ID fornecido não pôde ser carregada.</span><button onClick={() => navigate(-1)} className="mt-6 px-5 py-2 bg-[#E6E3DC] text-gray-900 rounded-md hover:bg-[#e0dbcf] transition">Voltar</button></div>;
   
   return (
     <div className="flex flex-col min-h-screen bg-[#A9AD99] font-poppins">
@@ -224,6 +208,7 @@ export default function TelaEdicaoHorta() {
               <button type="button" onClick={handleResetForm} disabled={isSubmitting || !originalHorta} className="p-2 text-gray-800 hover:text-blue-600 disabled:opacity-50" title="Restaurar dados originais"><FiRotateCcw className="w-5 h-5" /></button>
             </header>
 
+            {/* CÓDIGO COMPLETO DAS SEÇÕES DO FORMULÁRIO */}
             <Section title="Informações Gerais">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                 <div>
@@ -266,15 +251,14 @@ export default function TelaEdicaoHorta() {
             <Section title="Associações e Imagem">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 items-start">
                 <div className="space-y-4">
-                  
                   <div>
                     <label className="block text-sm font-medium text-gray-900">Usuário Responsável</label>
                     <div className="mt-1 flex items-center justify-between p-2 h-10 bg-gray-100 text-gray-700 rounded-md border border-gray-300 shadow-sm">
                       <span className="truncate">{formData.nomeUsuario}</span>
                       <button
                         type="button"
-                        onClick={() => navigate(`/app/usuarios-editar/${originalHorta.idUsuario}`)}
-                        disabled={!originalHorta?.idUsuario}
+                        onClick={() => navigate(`/app/usuarios-editar/${originalHorta.usuario?.idUsuario}`)}
+                        disabled={!originalHorta?.usuario?.idUsuario}
                         className="ml-2 p-1 text-blue-600 hover:text-blue-800 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         title={`Editar dados de ${formData.nomeUsuario}`}
                       >
@@ -338,7 +322,7 @@ export default function TelaEdicaoHorta() {
           <div className="max-w-4xl mx-auto flex justify-end gap-3">
             <button type="button" onClick={() => navigate(-1)} disabled={isSubmitting} className="px-5 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors">Cancelar</button>
             <button type="submit" form="edit-horta-form" disabled={isSubmitting || isLoading || optionsLoading || !formData} className="px-5 py-2 flex items-center justify-center bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-green-300">
-              {isSubmitting ? <FiLoader className="animate-spin" /> : <><FiSave className="mr-2"/> Salvar Alterações na Horta</>}
+              {isSubmitting ? <FiLoader className="animate-spin" /> : <><FiSave className="mr-2"/> Salvar Alterações</>}
             </button>
           </div>
         </footer>

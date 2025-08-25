@@ -1,3 +1,4 @@
+// Caminho: src/services/courseService.ts
 // ✅ ARQUITETURA CORRETA: Importamos a instância ÚNICA e centralizada do Axios.
 // Isso garante que estamos usando a baseURL correta definida no arquivo .env.
 import api from './api';
@@ -42,18 +43,13 @@ export const getCursoById = async (id: number): Promise<CursoResponse> => {
  */
 export const createCurso = async (cursoData: CursoRequest, bannerFile?: File): Promise<CursoResponse> => {
   const formData = new FormData();
-
-  // ✅ CORRIGIDO: O nome da parte ('curso') agora corresponde ao @RequestPart("curso") do Controller.
   formData.append('curso', new Blob([JSON.stringify(cursoData)], { type: 'application/json' }));
 
   if (bannerFile) {
-    // ✅ CORRIGIDO: O nome da parte ('banner') agora corresponde ao @RequestPart("banner") do Controller.
     formData.append('banner', bannerFile);
   }
 
   try {
-    // ✅ CORRIGIDO: O header 'Content-Type' foi REMOVIDO.
-    // O navegador irá defini-lo automaticamente com o 'boundary' correto para multipart/form-data.
     const { data } = await api.post<CursoResponse>('/cursos', formData);
     return data;
   } catch (error) {
@@ -71,17 +67,13 @@ export const createCurso = async (cursoData: CursoRequest, bannerFile?: File): P
  */
 export const updateCurso = async (id: number, cursoData: CursoUpdate, bannerFile?: File): Promise<CursoResponse> => {
     const formData = new FormData();
-
-    // ✅ CORRIGIDO: O nome da parte ('curso') corresponde ao @RequestPart("curso").
     formData.append('curso', new Blob([JSON.stringify(cursoData)], { type: 'application/json' }));
 
     if (bannerFile) {
-        // ✅ CORRIGIDO: O nome da parte ('banner') corresponde ao @RequestPart("banner").
         formData.append('banner', bannerFile);
     }
 
     try {
-        // ✅ CORRIGIDO: O header 'Content-Type' foi REMOVIDO.
         const { data } = await api.put<CursoResponse>(`/cursos/${id}`, formData);
         return data;
     } catch (error) {

@@ -5,6 +5,30 @@ import api, { BACKEND_URL } from '../../../services/api';
 import { FiUpload, FiCheckCircle, FiXCircle, FiCalendar, FiLoader, FiAlertCircle, FiImage } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import placeholderBanner from '../../../assets/images/folhin.png'; // Fallback local
+
+// ======================= INÍCIO DA CORREÇÃO =======================
+
+// A URL pública correta para o placeholder, conforme definido no WebConfig.java
+const PLACEHOLDER_URL = `${BACKEND_URL}/uploads/banners/folhin.png`;
+
+/**
+ * Função auxiliar para gerar a URL correta e pública da imagem do banner.
+ * Ela extrai apenas o nome do arquivo do caminho recebido da API,
+ * tornando o código robusto contra inconsistências no caminho retornado.
+ * @param {string} urlFromServer - O caminho da imagem retornado pelo DTO do backend.
+ * @returns {string} A URL completa e funcional da imagem.
+ */
+const getImageUrl = (urlFromServer) => {
+  if (!urlFromServer || urlFromServer.endsWith('folhin.png')) {
+    return PLACEHOLDER_URL;
+  }
+  // Extrai apenas a parte final da URL (o nome do arquivo)
+  const fileName = urlFromServer.substring(urlFromServer.lastIndexOf('/') + 1);
+  return `${BACKEND_URL}/uploads/banners/${fileName}`;
+};
+
+// ======================== FIM DA CORREÇÃO =========================
 
 const formatDateForInput = (dateString) => {
   if (!dateString) return '';
@@ -38,8 +62,6 @@ export default function TelaDeEdicaoDeCursos() {
     publicosAlvo: [],
     turnos: []
   });
-
-  const SERVER_PLACEHOLDER_URL = `${BACKEND_URL}/api/arquivos/banners/folhin.png`;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,14 +99,8 @@ export default function TelaDeEdicaoDeCursos() {
           ativo: data.ativo ?? true,
         });
         
-        // ======================= INÍCIO DA CORREÇÃO =======================
-        // Usa a propriedade correta 'fotoBannerUrl' que vem do DTO da API.
-        if (data.fotoBannerUrl && !data.fotoBannerUrl.endsWith('folhin.png')) {
-          setBannerPreview(`${BACKEND_URL}${data.fotoBannerUrl.replace('/api', '')}`);
-        } else {
-          setBannerPreview(SERVER_PLACEHOLDER_URL);
-        }
-        // ======================== FIM DA CORREÇÃO =========================
+        // CORREÇÃO: Utiliza a função auxiliar para garantir a URL correta.
+        setBannerPreview(getImageUrl(data.fotoBannerUrl));
         
         setFormOptions(optionsResponse.data);
         setError(null);
@@ -97,7 +113,7 @@ export default function TelaDeEdicaoDeCursos() {
       }
     };
     fetchData();
-  }, [id, navigate, SERVER_PLACEHOLDER_URL]);
+  }, [id, navigate]);
 
   const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
@@ -160,14 +176,8 @@ export default function TelaDeEdicaoDeCursos() {
       toast.success('Atividade atualizada com sucesso!');
       setFeedback({ type: 'success', message: 'Atividade atualizada com sucesso!' });
 
-      // ======================= INÍCIO DA CORREÇÃO =======================
-      // Usa a propriedade correta 'fotoBannerUrl' da resposta da API após salvar.
-      if (response.data && response.data.fotoBannerUrl && !response.data.fotoBannerUrl.endsWith('folhin.png')) {
-        setBannerPreview(`${BACKEND_URL}${response.data.fotoBannerUrl.replace('/api', '')}`);
-      } else {
-        setBannerPreview(SERVER_PLACEHOLDER_URL);
-      }
-      // ======================== FIM DA CORREÇÃO =========================
+      // CORREÇÃO: Utiliza a função auxiliar para exibir a nova imagem corretamente.
+      setBannerPreview(getImageUrl(response.data?.fotoBannerUrl));
       
       setBannerFile(null);
       setOriginalCurso(response.data);
@@ -181,7 +191,7 @@ export default function TelaDeEdicaoDeCursos() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [id, navigate, formData, bannerFile, SERVER_PLACEHOLDER_URL]);
+  }, [id, navigate, formData, bannerFile]);
 
   if (loading || !formData) {
     return (
@@ -277,7 +287,7 @@ export default function TelaDeEdicaoDeCursos() {
                           src={bannerPreview} 
                           alt="Preview do banner" 
                           className="object-contain w-full h-full" 
-                          onError={(e) => { e.target.src = SERVER_PLACEHOLDER_URL; }} 
+                          onError={(e) => { e.target.src = placeholderBanner; }} 
                         />
                       ) : (
                         <div className="flex flex-col items-center text-gray-700 p-4 text-center">

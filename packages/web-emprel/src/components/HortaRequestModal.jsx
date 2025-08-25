@@ -1,6 +1,19 @@
+// Caminho: src/components/HortaRequestModal.jsx
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import api from '../services/api';
 import FakeCaptcha from './FakeCaptcha';
+
+const ESCOLARIDADE_OPTIONS = [
+    { id: 'SEM_ESCOLARIDADE', nome: 'Sem Escolaridade' },
+    { id: 'ENSINO_FUNDAMENTAL_INCOMPLETO', nome: 'Fundamental Incompleto' },
+    { id: 'ENSINO_FUNDAMENTAL_COMPLETO', nome: 'Fundamental Completo' },
+    { id: 'ENSINO_MEDIO_INCOMPLETO', nome: 'Médio Incompleto' },
+    { id: 'ENSINO_MEDIO_COMPLETO', nome: 'Médio Completo' },
+    { id: 'ENSINO_SUPERIOR_INCOMPLETO', nome: 'Superior Incompleto' },
+    { id: 'ENSINO_SUPERIOR_COMPLETO', nome: 'Superior Completo' },
+    { id: 'POS_GRADUACAO', nome: 'Pós-graduação' },
+];
 
 export default function HortaRequestModal({ onClose }) {
     const [tiposHorta, setTiposHorta] = useState([]);
@@ -13,11 +26,24 @@ export default function HortaRequestModal({ onClose }) {
     const [success, setSuccess] = useState(null);
 
     const [formData, setFormData] = useState({
-        nome: '', email: '', telefone: '', escolaridade: 'SEM_ESCOLARIDADE', funcaoCargo: '',
-        idTipoDeHorta: '', endereco: '', tamanhoAreaProducao: '', idAreaClassificacao: '',
-        idAtividadesProdutivas: '', qntPessoas: '3', caracteristicaGrupo: '', atividadeDescricao: '',
-        parceria: '', imagem: null, isPublica: false, publicoBeneficiario: '', cadunico: '',
-        responsavelComunidade: '', parceirosComunitarios: ''
+        nome: '',
+        cpf: '',
+        dataNascimento: '',
+        email: '',
+        telefone: '',
+        escolaridade: 'SEM_ESCOLARIDADE',
+        funcaoCargo: '',
+        idTipoDeHorta: '',
+        endereco: '',
+        tamanhoAreaProducao: '',
+        idAreaClassificacao: '',
+        idAtividadesProdutivas: '',
+        qntPessoas: '3',
+        caracteristicaGrupo: '',
+        atividadeDescricao: '',
+        parceria: '',
+        imagem: null,
+        isPublica: false,
     });
 
     useEffect(() => {
@@ -25,9 +51,9 @@ export default function HortaRequestModal({ onClose }) {
             setLoading(true);
             try {
                 const [tiposRes, areasRes, atividadesRes] = await Promise.all([
-                    api.get('/hortas/tipo'),
-                    api.get('/hortas/areas-classificacao'),
-                    api.get('/hortas/atividades-produtivas')
+                    api.get('/tipos-horta'),
+                    api.get('/areas-classificacao'),
+                    api.get('/atividades-produtivas')
                 ]);
                 setTiposHorta(tiposRes.data);
                 setAreasClassificacao(areasRes.data);
@@ -45,63 +71,52 @@ export default function HortaRequestModal({ onClose }) {
         const { name, value, type, checked, files } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : type === 'file' ? files[0] : value
+            [name]: type === 'checkbox' ? checked : (type === 'file' ? files[0] : value)
         }));
     };
 
-    const getValidationState = () => {
-        const selectedTipo = tiposHorta.find(t => t.idTipoDeHorta == formData.idTipoDeHorta);
-        if (!selectedTipo) return { isValid: false, message: 'Selecione um tipo de horta para continuar.' };
-        
-        const tipoNome = selectedTipo.nome.toLowerCase();
-        const isInstitucional = ['escolar', 'saúde', 'institucional'].some(term => tipoNome.includes(term));
-        
-        if (isInstitucional && !formData.isPublica) {
-            return { isValid: false, message: 'Para este tipo, a instituição deve ser pública ou filantrópica.' };
-        }
-        if (parseInt(formData.qntPessoas, 10) < 3) {
-            return { isValid: false, message: 'O grupo deve ter no mínimo 3 participantes.' };
-        }
-        if (tipoNome.includes('comunitária') && !isCaptchaSolved) {
-            return { isValid: false, message: 'Por favor, complete a verificação de segurança (CAPTCHA).' };
-        }
-        return { isValid: true, message: '' };
-    };
-
-    const validation = getValidationState();
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validation.isValid) {
-            setError(validation.message);
-            return;
-        }
-
         setLoading(true);
         setError(null);
+        setSuccess(null);
 
         try {
-            // Gerando um CPF e data de nascimento placeholders, já que não são pedidos no formulário.
-            const pessoaResponse = await api.post('/pessoas', { nome: formData.nome, email: formData.email, telefone: formData.telefone, cpf: Date.now().toString().slice(-11), dataNascimento: '1990-01-01', escolaridade: formData.escolaridade });
-            const usuarioResponse = await api.post('/usuarios', { pessoa: { idPessoa: pessoaResponse.data.idPessoa }, senha: Date.now().toString(), ativo: true });
-            
-            const hortaData = new FormData();
-            hortaData.append('nomeHorta', `Solicitação de ${formData.nome}`);
-            hortaData.append('idUsuario', usuarioResponse.data.idUsuario);
-            hortaData.append('idTipoDeHorta', formData.idTipoDeHorta);
-            hortaData.append('endereco', formData.endereco);
-            hortaData.append('tamanhoAreaProducao', formData.tamanhoAreaProducao);
-            hortaData.append('idAreaClassificacao', formData.idAreaClassificacao);
-            hortaData.append('idAtividadesProdutivas', formData.idAtividadesProdutivas);
-            hortaData.append('qntPessoas', formData.qntPessoas);
-            hortaData.append('atividadeDescricao', formData.atividadeDescricao);
-            hortaData.append('imagem', formData.imagem);
-            hortaData.append('idUnidadeEnsino', 1); // Placeholder, conforme schema NOT NULL
-            if (formData.funcaoCargo) hortaData.append('funcaoUniEnsino', formData.funcaoCargo);
-            if (formData.caracteristicaGrupo) hortaData.append('caracteristicaGrupo', formData.caracteristicaGrupo);
-            if (formData.parceria) hortaData.append('parceria', formData.parceria);
+            const usuarioPayload = {
+                nome: formData.nome,
+                email: formData.email,
+                telefone: formData.telefone.replace(/\D/g, ''),
+                cpf: formData.cpf.replace(/\D/g, ''),
+                dataNascimento: formData.dataNascimento,
+                escolaridade: formData.escolaridade,
+            };
+            const usuarioResponse = await api.post('/usuarios', usuarioPayload);
+            const novoUsuario = usuarioResponse.data;
 
-            await api.post('/hortas', hortaData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            const hortaJson = {
+                nomeHorta: `Solicitação de ${formData.nome}`,
+                idUsuario: novoUsuario.idUsuario,
+                idTipoDeHorta: formData.idTipoDeHorta,
+                endereco: formData.endereco,
+                tamanhoAreaProducao: formData.tamanhoAreaProducao,
+                idAreaClassificacao: formData.idAreaClassificacao,
+                idAtividadesProdutivas: formData.idAtividadesProdutivas,
+                qntPessoas: formData.qntPessoas,
+                atividadeDescricao: formData.atividadeDescricao,
+                idUnidadeEnsino: 1,
+                funcaoUniEnsino: formData.funcaoCargo,
+                caracteristicaGrupo: formData.caracteristicaGrupo,
+                parceria: formData.parceria,
+            };
+
+            const hortaFormData = new FormData();
+            hortaFormData.append('horta', new Blob([JSON.stringify(hortaJson)], { type: 'application/json' }));
+            
+            if (formData.imagem) {
+                hortaFormData.append('imagem', formData.imagem);
+            }
+            
+            await api.post('/hortas', hortaFormData);
             
             setSuccess("Sua solicitação foi enviada com sucesso! Entraremos em contato em breve.");
             setTimeout(onClose, 5000);
@@ -117,18 +132,26 @@ export default function HortaRequestModal({ onClose }) {
     
     const renderField = (label, name, options = {}) => {
         const { type = 'text', required = false, selectOptions = [] } = options;
+        const commonProps = {
+            id: name,
+            name: name,
+            onChange: handleChange,
+            required: required,
+            className: "w-full p-2 border border-gray-300 rounded-lg shadow-sm"
+        };
+
         return (
             <div>
                 <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}{required && ' *'}</label>
                 {type === 'select' ? (
-                    <select id={name} name={name} value={formData[name]} onChange={handleChange} required={required} className="w-full p-2 border border-gray-300 rounded-lg shadow-sm">
+                    <select {...commonProps} value={formData[name]}>
                         <option value="">Selecione...</option>
                         {selectOptions.map(opt => <option key={opt.id} value={opt.id}>{opt.nome}</option>)}
                     </select>
                 ) : type === 'textarea' ? (
-                    <textarea id={name} name={name} value={formData[name]} onChange={handleChange} required={required} className="w-full p-2 border border-gray-300 rounded-lg shadow-sm" rows="3"></textarea>
+                    <textarea {...commonProps} value={formData[name]} rows="3"></textarea>
                 ) : (
-                    <input type={type} id={name} name={name} value={type === 'file' ? undefined : formData[name]} onChange={handleChange} required={required} className="w-full p-2 border border-gray-300 rounded-lg shadow-sm" />
+                    <input {...commonProps} type={type} value={type === 'file' ? undefined : formData[name]} />
                 )}
             </div>
         );
@@ -152,10 +175,12 @@ export default function HortaRequestModal({ onClose }) {
                         <fieldset className="border p-4 rounded-lg"><legend className="text-xl font-semibold text-[#1D3557] px-2">Informações do Solicitante</legend>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                                 {renderField("Nome Completo", "nome", { required: true })}
+                                {renderField("CPF", "cpf", { required: true })}
+                                {renderField("Data de Nascimento", "dataNascimento", { type: 'date', required: true })}
                                 {renderField("E-mail", "email", { type: 'email', required: true })}
                                 {renderField("Telefone", "telefone", { type: 'tel', required: true })}
                                 {renderField("Função/Cargo na unidade", "funcaoCargo")}
-                                {renderField("Escolaridade", "escolaridade", { type: 'select', selectOptions: [{id: "SEM_ESCOLARIDADE", nome: "Sem Escolaridade"}, {id: "ENSINO_FUNDAMENTAL_INCOMPLETO", nome: "Fundamental Incompleto"}, {id: "ENSINO_FUNDAMENTAL_COMPLETO", nome: "Fundamental Completo"}, {id: "ENSINO_MEDIO_INCOMPLETO", nome: "Médio Incompleto"}, {id: "ENSINO_MEDIO_COMPLETO", nome: "Médio Completo"}, {id: "ENSINO_SUPERIOR_INCOMPLETO", nome: "Superior Incompleto"}, {id: "ENSINO_SUPERIOR_COMPLETO", nome: "Superior Completo"}, {id: "POS_GRADUACAO", nome: "Pós-graduação"}] })}
+                                {renderField("Escolaridade", "escolaridade", { type: 'select', selectOptions: ESCOLARIDADE_OPTIONS })}
                             </div>
                         </fieldset>
 
@@ -177,29 +202,33 @@ export default function HortaRequestModal({ onClose }) {
                                         {renderField("Nº de pessoas no grupo", "qntPessoas", { type: 'number', required: true })}
                                         {renderField("Características do grupo", "caracteristicaGrupo", { type: 'textarea' })}
                                         {renderField("Descrição das atividades planejadas", "atividadeDescricao", { type: 'textarea', required: true })}
-                                        {renderField("Possui parceria com alguma instituição? Se sim, quais?", "parceria")}
-                                        {renderField("Foto da área", "imagem", { type: 'file', required: true })}
+                                        {renderField("Possui parceria com alguma instituição?", "parceria", { type: 'textarea' })}
+                                        <div>
+                                            <label htmlFor="imagem" className="block text-sm font-medium text-gray-700 mb-1">Foto da área *</label>
+                                            <input type="file" id="imagem" name="imagem" onChange={handleChange} required className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
+                                        </div>
                                         
-                                        {(selectedTipo.nome.toLowerCase().includes('escolar') || selectedTipo.nome.toLowerCase().includes('saúde')) && renderField("Público beneficiário/Características", "publicoBeneficiario", { type: 'textarea' })}
-                                        {selectedTipo.nome.toLowerCase().includes('comunitária') && (
-                                            <>
-                                                {renderField("Responsável pela comunidade", "responsavelComunidade")}
-                                                {renderField("Instituições/coletivos apoiadores", "parceirosComunitarios")}
-                                                {renderField("Nº do CadÚnico do responsável (se possuir)", "cadunico")}
-                                                <div className="md:col-span-2 flex justify-center pt-4"><FakeCaptcha onChange={setIsCaptchaSolved} resetKey={captchaResetKey} /></div>
-                                            </>
+                                        {selectedTipo.nome.toLowerCase().includes('comunitaria') && (
+                                            <div className="md:col-span-2 flex justify-center pt-4"><FakeCaptcha onChange={setIsCaptchaSolved} resetKey={captchaResetKey} /></div>
                                         )}
                                     </>
                                 )}
                             </div>
                         </fieldset>
                         
-                        {formData.idTipoDeHorta && !validation.isValid && <div className="bg-yellow-100 p-3 rounded-lg text-center font-semibold text-yellow-800">{validation.message}</div>}
-                        
-                        <div className="flex justify-end gap-4 pt-4 border-t mt-4"><button type="button" onClick={onClose} className="px-6 py-2 bg-gray-200 rounded-lg font-semibold hover:bg-gray-300">Cancelar</button><button type="submit" disabled={!validation.isValid || loading} className="px-6 py-2 bg-[#F4D35E] text-[#1D3557] font-bold rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed">{loading ? 'Enviando...' : 'Enviar Solicitação'}</button></div>
+                        <div className="flex justify-end gap-4 pt-4 border-t mt-4">
+                            <button type="button" onClick={onClose} className="px-6 py-2 bg-gray-200 rounded-lg font-semibold hover:bg-gray-300">Cancelar</button>
+                            <button type="submit" disabled={loading} className="px-6 py-2 bg-[#F4D35E] text-[#1D3557] font-bold rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                {loading ? 'Enviando...' : 'Enviar Solicitação'}
+                            </button>
+                        </div>
                     </form>
                 )}
             </div>
         </div>
     );
 }
+
+HortaRequestModal.propTypes = {
+  onClose: PropTypes.func.isRequired,
+};

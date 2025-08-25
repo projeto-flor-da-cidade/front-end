@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import Slider from 'react-slick';
+// Caminho: src/modules/Home/Home.tsx
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+// CORREÇÃO: Com @types/react-slick instalado, esta importação agora funciona corretamente.
+import Slider, { Settings } from 'react-slick';
 import { FaChevronDown } from 'react-icons/fa';
 import { getAllCursos } from '../../services/curso.service';
 import { CursoResponse } from '../../types/api.types';
+import { BACKEND_URL } from '../../services/api';
 import Header from '../../components/Header.jsx';
 import Footer from '../../components/Footer.jsx';
 import CourseModal from '../../components/CourseModal.tsx'; 
@@ -18,8 +21,7 @@ import apoioHortasImg from '../../assets/images/apoio-hortas.jpg';
 import cursosOficinasImg from '../../assets/images/cursos-oficinas.jpg';
 import novidadesImg from '../../assets/images/novidades.jpg';
 import adrianaImg from '../../assets/images/adrianafigueira.jpg';
-import fallbackImage from '../../assets/images/FolhinSemImagem.png';
-
+import fallbackImage from '../../assets/images/folhin.png';
 
 export default function Home() {
   const [seauCourses, setSeauCourses] = useState<CursoResponse[]>([]);
@@ -36,6 +38,10 @@ export default function Home() {
   const [activePlantTab, setActivePlantTab] = useState('manjericao');
   const [areRecipesOpen, setAreRecipesOpen] = useState(false);
 
+  // CORREÇÃO: Com os tipos instalados, useRef<Slider> agora é corretamente reconhecido.
+  const seauSliderRef = useRef<Slider>(null);
+  const externalSliderRef = useRef<Slider>(null);
+
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -47,11 +53,7 @@ export default function Home() {
         setExternalCourses(activeCourses.filter(c => c.instituicao !== 'SEAU'));
       } catch (err) {
         console.error("Erro detalhado ao buscar cursos:", err);
-        if (err instanceof Error) {
-          setError(`Não foi possível carregar os cursos. Verifique sua conexão e se o servidor está no ar.`);
-        } else {
-          setError("Ocorreu um erro desconhecido ao buscar os cursos.");
-        }
+        setError("Não foi possível carregar os cursos. Verifique sua conexão.");
       } finally {
         setLoading(false);
       }
@@ -79,20 +81,11 @@ export default function Home() {
   
   const handleTtsMouseOver = useCallback((event: MouseEvent) => {
     if (!isTtsEnabled) return;
-    const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
+    const target = event.target as HTMLElement;
     const readableTags = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'A', 'LI', 'BUTTON', 'SUMMARY', 'SPAN', 'DIV', 'IMG'];
-    const altText = (target instanceof HTMLImageElement) ? target.alt : '';
+    const altText = (target as HTMLImageElement).alt;
     let textToSpeak = target.innerText || altText || target.title;
-    if (!textToSpeak && target.children.length > 0) {
-      for (let child of Array.from(target.children)) {
-        if ((child as HTMLElement).innerText) {
-          textToSpeak = (child as HTMLElement).innerText;
-          break;
-        }
-      }
-    }
-    if (readableTags.includes(target.tagName) && textToSpeak && textToSpeak.trim().length > 0) {
+    if (readableTags.includes(target.tagName) && textToSpeak?.trim()) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(textToSpeak.trim());
       utterance.lang = 'pt-BR';
@@ -101,36 +94,53 @@ export default function Home() {
   }, [isTtsEnabled]);
 
   useEffect(() => {
-    document.addEventListener('mouseover', handleTtsMouseOver as EventListener);
-    return () => {
-      document.removeEventListener('mouseover', handleTtsMouseOver as EventListener);
-      window.speechSynthesis.cancel();
-    };
+    document.addEventListener('mouseover', handleTtsMouseOver);
+    return () => document.removeEventListener('mouseover', handleTtsMouseOver);
   }, [handleTtsMouseOver]);
 
   const handleNavClick = (event: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
     event.preventDefault();
-    const targetElement = document.querySelector(targetId);
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window.history.pushState(null, '', `/${targetId}`);
-    }
+    document.querySelector(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.history.pushState(null, '', `/${targetId}`);
   };
 
+  const updateSlideFocus = (sliderRef: React.RefObject<Slider>) => {
+    if (!sliderRef.current) return;
+    const slickList = (sliderRef.current as any).innerSlider?.list;
+    if (!slickList) return;
+    const slides = slickList.querySelectorAll('.slick-slide');
+    slides.forEach((slide: HTMLElement) => {
+      const isVisible = slide.classList.contains('slick-active');
+      const focusableElements = slide.querySelectorAll('a, button, input, select, textarea');
+      focusableElements.forEach((element: Element) => {
+        element.setAttribute('tabindex', isVisible ? '0' : '-1');
+      });
+    });
+  };
+  
   const serviceCards = [
     { img: apoioHortasImg, alt: 'Pessoas trabalhando em canteiros de uma horta comunitária', title: 'Apoio Para Hortas', text: 'Solicite apoio técnico para iniciar ou manter sua horta comunitária.', targetId: '#acolhimentos' },
     { img: cursosOficinasImg, alt: 'Alface verde e viçosa crescendo em uma horta', title: 'Cursos e Oficinas', text: 'Conheça nossos cursos e oficinas sobre agroecologia e cultivo urbano.', targetId: '#cursos' },
     { img: novidadesImg, alt: 'Pessoas sentadas em uma sala de aula assistindo a uma apresentação', title: 'Novidades', text: 'Atualize-se com nossas novidades e práticas em agroecologia.', targetId: '#informativos' }
   ];
 
-  const sliderSettings = {
-    dots: true, infinite: false, speed: 500, slidesToShow: 3, slidesToScroll: 1, autoplay: true, autoplaySpeed: 3000,
+  // CORREÇÃO: A anotação de tipo 'Settings' agora é reconhecida.
+  const createSliderSettings = (sliderRef: React.RefObject<Slider>): Settings => ({
+    dots: true,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    onInit: () => setTimeout(() => updateSlideFocus(sliderRef), 100),
+    afterChange: () => updateSlideFocus(sliderRef),
     responsive: [
       { breakpoint: 1024, settings: { slidesToShow: 2, slidesToScroll: 1 } },
       { breakpoint: 768, settings: { slidesToShow: 1, slidesToScroll: 1 } },
     ],
-  };
-
+  });
+  
   const fontHandlers = {
     increase: () => setBaseFontSize(size => Math.min(size + 2, 24)),
     decrease: () => setBaseFontSize(size => Math.max(size - 2, 12)),
@@ -139,16 +149,17 @@ export default function Home() {
   const darkModeHandler = { toggle: () => setDarkMode(prev => !prev), isDarkMode };
   const ttsHandler = { toggle: () => setTtsEnabled(prev => !prev), isTtsEnabled };
 
-  const renderCourseSlider = (courses: CursoResponse[], title: string) => (
+  const renderCourseSlider = (courses: CursoResponse[], title: string, sliderRef: React.RefObject<Slider>) => (
     <div className="w-full">
       <h2 className="text-3xl font-bold text-[#1D3557] mb-6 text-center">{title}</h2>
       {courses.length > 0 ? (
-        <Slider {...sliderSettings}>
+        <Slider ref={sliderRef} {...createSliderSettings(sliderRef)}>
           {courses.map((course) => (
             <div key={course.idCurso} className="px-3">
               <div className="group flex h-96 flex-col overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300">
                 <img
-                  src={course.bannerUrl || fallbackImage}
+                  // Usamos `(course as any).fotoBannerUrl` como workaround para a inconsistência de tipo local
+                  src={(course as any).fotoBannerUrl ? `${BACKEND_URL}${(course as any).fotoBannerUrl}` : fallbackImage}
                   alt={`Banner do curso ${course.nome}`}
                   className="h-40 w-full object-cover"
                   onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
@@ -180,7 +191,9 @@ export default function Home() {
         isMenuOpen={isAccessibilityMenuOpen}
         onMenuToggle={() => setAccessibilityMenuOpen(prev => !prev)}
         accessibilityHandlers={{ fontHandlers, darkModeHandler, ttsHandler }}
-        navLinks={homePageNavLinks}
+        // O `as any` não é mais estritamente necessário se a prop no Header for bem tipada,
+        // mas é mantido como uma salvaguarda.
+        navLinks={homePageNavLinks as any}
         onNavClick={handleNavClick}
       />
       <main className="mx-auto max-w-7xl px-4 space-y-12 md:space-y-16 my-8">
@@ -189,7 +202,6 @@ export default function Home() {
           <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Sua plataforma completa para a agricultura urbana no Recife. Explore nossos serviços, cursos e novidades para cultivar um futuro mais verde e sustentável.</p>
         </div>
 
-        {/* AJUSTE: Adicionada margem superior negativa (-mt-8) para reduzir o espaço */}
         <div className="relative z-10 -mt-8">
           <h2 className="text-4xl font-extrabold text-center text-[#1D3557] mb-10">Nossos Serviços</h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -198,25 +210,13 @@ export default function Home() {
                 key={i}
                 href={card.targetId}
                 onClick={(e) => handleNavClick(e, card.targetId)}
-                className="group relative h-[400px] rounded-2xl overflow-hidden shadow-lg 
-                           transition-all duration-300 ease-in-out 
-                           hover:shadow-2xl hover:!z-20 hover:-translate-y-2"
+                className="group relative h-[400px] rounded-2xl overflow-hidden shadow-lg transition-all duration-300 ease-in-out hover:shadow-2xl hover:!z-20 hover:-translate-y-2"
               >
-                <img
-                  src={card.img}
-                  alt={card.alt}
-                  className="absolute inset-0 w-full h-full object-cover 
-                             transition-transform duration-300 ease-in-out 
-                             group-hover:scale-110"
-                />
+                <img src={card.img} alt={card.alt} className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"/>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                 <div className="relative z-10 flex h-full flex-col justify-end p-6 text-white [text-shadow:2px_2px_4px_rgba(0,0,0,0.7)]">
-                  <h3 className="text-3xl font-bold mb-2 transition-colors duration-300 group-hover:text-[#F4D35E]">
-                    {card.title}
-                  </h3>
-                  <p className="mb-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                    {card.text}
-                  </p>
+                  <h3 className="text-3xl font-bold mb-2 transition-colors duration-300 group-hover:text-[#F4D35E]">{card.title}</h3>
+                  <p className="mb-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">{card.text}</p>
                 </div>
               </a>
             ))}
@@ -232,8 +232,8 @@ export default function Home() {
           {error && <p className="text-center text-red-600 font-bold">{error}</p>}
           {!loading && !error && (
             <div className='space-y-12'>
-              {renderCourseSlider(seauCourses, "Nossos Cursos SEAU")}
-              {renderCourseSlider(externalCourses, "Cursos de Parceiros")}
+              {renderCourseSlider(seauCourses, "Nossos Cursos SEAU", seauSliderRef)}
+              {renderCourseSlider(externalCourses, "Cursos de Parceiros", externalSliderRef)}
             </div>
           )}
         </div>
